@@ -1,0 +1,1091 @@
+\documentclass[11pt, oneside]{article}   	% use "amsart" instead of "article" for AMSLaTeX format
+\usepackage{geometry}                		% See geometry.pdf to learn the layout options. There are lots.
+\geometry{letterpaper}                   		% ... or a4paper or a5paper or ... 
+%\geometry{landscape}                		% Activate for for rotated page geometry
+%\usepackage[parfill]{parskip}    		% Activate to begin paragraphs with an empty line rather than an indent
+\usepackage{graphicx}				% Use pdf, png, jpg, or eps§ with pdflatex; use eps in DVI mode
+								% TeX will automatically convert eps --> pdf in pdflatex		
+\usepackage{amssymb}
+\usepackage{amsmath}
+%\usepackage[]{show keys}			%Toggle to show labels in output
+\usepackage{listings}
+
+%\numberwithin{equation}{subsection}
+
+\title{Derivation for Reflection Coefficients of a Truncated Slab Waveguide}
+\author{Patrick Landreman}
+%\date{}							% Activate to display a given date or no date
+
+\begin{document}
+\lstset{language=Python, frame=single, breaklines=true}
+\maketitle
+\section{Problem Geometry}
+
+Consider a dielectric slab waveguide such that waves propagate along the $z$-axis. The slab extends infinitely along $y$, and has interfaces at $|x| = d$. At the plane $z=0$, the slab terminates abruptly.\\
+
+\noindent The slab has refractive index $n$, and relative permittivity $\epsilon_{r} = n^{2}$.\\
+
+\noindent In this model, we use the convention $e^{i(\omega t - \beta z)}$
+
+\noindent We will make frequent use of the following wave vectors:
+
+\begin{align}
+k &= \omega / c \nonumber \\
+\intertext{(continuum modes)}
+\rho &= \sqrt{k^{2} - \beta^{2}_{c}} \nonumber \\
+\sigma &= \sqrt{n^{2} k^{2} - \beta^{2}_{c}} \nonumber \\
+\intertext{(guided modes)}
+\gamma &= \sqrt{\beta^{2}_{n}-k^{2}} \nonumber \\
+\kappa &= \sqrt{n^{2} k^{2} - \beta^{2}_{m}} \nonumber
+\end{align}
+
+\section{Relationship between Primary and Complimentary fields}
+
+For each polarization, the $y$-directed field component is referred to as dominant. Since we will be exploiting orthogonality using the $z$-component of power flow, we care about the corresponding $x$-oriented field component of the complimentary field.
+
+\subsection{TM}
+
+\noindent We employ Maxwell's Equations to reduce the problem to the $H_{y}$ field components:
+
+\begin{align}
+\nabla \times \mathbf{H} &= \frac{\partial \mathbf{D}}{\partial t} = \epsilon \frac{\partial \mathbf{E}}{\partial t} = i\omega \epsilon \mathbf{E}\\
+\intertext{Also,}
+\nabla \times \mathbf{H} &= \begin{vmatrix}
+\hat{x}& \hat{y}& \hat{z}\\
+\partial_{x}& \partial_{y}& \partial_{z}\\
+0& H_{y}& 0
+\end{vmatrix} = \hat{x} \left( -\frac{\partial H_{y}}{\partial z}\right) + \hat{z} \left( \frac{\partial H_{y}}{\partial x}\right)\\
+&= \hat{x} \left( i\beta H_{y}\right) + \hat{z} \left( -i\sqrt{k^{2}-\beta^{2}} H_{y}\right)
+\end{align}
+
+\noindent where it is important to note that $k$ changes inside and outside the slab.  For the transverse Electric field, then
+\begin{align}
+&E_{x} \cdot (i\omega \epsilon) = i\beta H_{y}\\
+&E_{x} = \frac{\beta}{\omega \epsilon} H_{y} \label{eq:ex-def}
+\end{align}
+
+\subsection{TE}
+
+\begin{align}
+\nabla \times \mathbf{E} &= -\frac{\partial \mathbf{B}}{\partial t} = -\mu \frac{\partial \mathbf{H}}{\partial t} = -i\omega \mu \mathbf{H}\\
+\intertext{Also,}
+\nabla \times \mathbf{E} &= \begin{vmatrix}
+\hat{x}& \hat{y}& \hat{z}\\
+\partial_{x}& \partial_{y}& \partial_{z}\\
+0& E_{y}& 0
+\end{vmatrix} = \hat{x} \left( -\frac{\partial E_{y}}{\partial z}\right) + \hat{z} \left( \frac{\partial E_{y}}{\partial x}\right)\\
+&= \hat{x} \left( i\beta E_{y}\right) + \hat{z} \left( -i\sqrt{k^{2}-\beta^{2}} E_{y}\right)
+\end{align}
+
+\noindent where it is important to note that $k$ changes inside and outside the slab.  For the transverse Electric field, then
+\begin{align}
+&H_{x} \cdot (-i\omega \mu) = i\beta E_{y}\\
+&H_{x} = -\frac{\beta}{\omega \mu} E_{y} \label{eq:hx-def}
+\end{align}
+ 
+
+\section{Orthogonality}
+
+The orthogonality between modes is expressed using the power carried by the fields
+
+\begin{equation}
+P_{z} \delta_{m,n} = \frac{1}{2} \int_{-\infty}^{\infty} \mathbf{E}_{m} \times \mathbf{H}_{n}^{*} \cdot \hat{z} \; dx
+\end{equation}
+
+\noindent where $m,n$ refer to different modes. For TM modes ($H_{x}, H_{z} = 0$) this reduces to 
+
+\begin{equation}
+P_{z} \delta_{m,n} = \frac{1}{2} \int_{-\infty}^{\infty} E_{x,m} H_{y,n}^{*} dx = \int_{0}^{\infty} \frac{\beta_{m}}{\omega \epsilon}  H_{y,m} H_{y,n} dx
+\label{eq:orthogonality-tm}
+\end{equation}
+
+\noindent For TE modes, orthogonality is expressed as 
+
+\begin{equation}
+P_{z} \delta_{m,n} = \frac{1}{2} \int_{-\infty}^{\infty} E_{y,m} H_{x,n}^{*} dx = \int_{0}^{\infty} \frac{\beta_{m}}{\omega \mu}  E_{y,m} E_{y,n} dx
+\label{eq:orthogonality-te}
+\end{equation}
+
+\noindent (Note: for the TE case, the value of beta is negated from the complex conjugation) \\
+
+\noindent For continuum modes, Gelin states that $P_{z}$ should be replaced by $P_z \frac{\beta}{|\beta|}$ to account for evanescence, or complex power flow. (should there be a minus sign in the TE result?)
+
+
+%%% TM Primary Equations %%%
+\newpage
+\section{TM Even Modes}
+\subsection{Primary Equations}
+
+Begin with a statement of the continuity of transverse fields across the end facet boundary:
+\begin{align}
+H_{y,m}^{i} + \sum_{n} a_{n} H_{y,n}^{r} + \int_{0}^{\infty} q^{r} (\rho) H_{y}^{r} (\rho) d\rho = \int_{0}^{\infty} q^{t} (\rho) H_{y}^{t} (\rho) d\rho \\
+E_{x,m}^{i} + \sum_{n} a_{n} E_{x,n}^{r} + \int_{0}^{\infty} q^{r} (\rho) E_{x}^{r} (\rho) d\rho = \int_{0}^{\infty} q^{t} (\rho) E_{x}^{t} (\rho) d\rho \label{eq:ex-continuity}
+\end{align}
+
+
+\noindent Substituting \eqref{eq:ex-def} into \eqref{eq:ex-continuity} and canceling the $\omega$s and $\epsilon_{o}$s, we now have the primary equations:
+
+\begin{align}
+H_{y,m}^{i} + \sum_{n} a_{n} H_{y,n}^{r} + \int_{0}^{\infty} q^{r} (\rho) H_{y}^{r} (\rho) d\rho &= \int_{0}^{\infty} q^{t} (\rho) H_{y}^{t} (\rho) d\rho \label{eq:primary-one}\\
+\frac{\beta_{m}}{\epsilon_{r}} H_{y,m}^{i} - \sum_{n} a_{n} \frac{\beta_{n}}{\epsilon_{r}} H_{y,n}^{r} - \int_{0}^{\infty} q^{r} (\rho) \frac{\beta (\rho)}{\epsilon_{r}} H_{y}^{r} (\rho) d\rho &= \int_{0}^{\infty} q^{t} (\rho) \beta (\rho)H_{y}^{t} (\rho) d\rho \label{eq:primary-two}
+\end{align} 
+
+\subsection{Solving for $q^{t}$}
+\label{sec:qt-tm}
+
+We're going to isolate $q^{t}(\rho)$. Dummy variables of integration will be indicated as $\rho '$ for distinction. Begin by multiplying each term in \eqref{eq:primary-one} by $ H_{y}^{t*}(\rho)$ and integrating over all space:
+
+\begin{align}
+&\int_{0}^{\infty} H_{y,m}^{i} H_{y}^{t*}(\rho) \, dx
++ \sum_{n} a_{n} \int_{0}^{\infty}  H_{y,n}^{r} H_{y}^{t*}(\rho) \, dx 
++ \int_{0}^{\infty} q^{r} (\rho ') \int_{0}^{\infty} H_{y}^{r} (\rho ') H_{y}^{t*} (\rho) \, dx \, d\rho ' \nonumber \\
+&= \int_{0}^{\infty} q^{t} (\rho ') \int_{0}^{\infty} H_{y}^{t} (\rho ') H_{y}^{t*} (\rho) \, dx \, d\rho '
+\end{align}
+
+\noindent From \eqref{eq:orthogonality-tm}, we can eliminate all but our target mode with wave vector $\rho$:
+
+\begin{align}
+\kappa_{m}(\rho)
++ \sum_{n} a_{n} \kappa_{n}(\rho)
++ \int_{0}^{\infty} q^{r} (\rho ') \zeta(\rho ',\rho) \, d\rho '
+&= \int_{0}^{\infty} q^{t} (\rho ') P \frac{\omega \epsilon_{o}}{|\beta (\rho)|} \delta (\rho '-\rho) \, d\rho ' \nonumber \\
+&= q^{t}(\rho) \cdot P \frac{\omega \epsilon_{o}}{|\beta (\rho)|}
+\label{eq:orthogonalized-one-qt-tm}
+\end{align}
+
+\noindent where we have introduced the functions
+
+\begin{align}
+&\kappa_{n}(\rho) = \int_{0}^{\infty} H_{y,n}^{i} H_{y}^{t*}(\rho) \, dx\\
+&\zeta (\rho ',\rho) = \int_{0}^{\infty} H_{y}^{r} (\rho ') H_{y}^{t*} (\rho) \, dx
+\end{align}
+
+We can repeat this procedure for \eqref{eq:primary-two}, producing
+
+\begin{align}
+\beta_{m} \nu_{m}(\rho)
+- \sum_{n} a_{n} \beta_{n} \nu_{n}(\rho)
+- \int_{0}^{\infty} q^{r} (\rho ') \beta (\rho ') f(\rho ',\rho) \, d\rho '
+= q^{t}(\rho) \beta (\rho) \cdot P \frac{\omega \epsilon_{o}}{|\beta (\rho)|}
+\label{eq:orthogonalized-two-qt-tm}
+\end{align}
+
+\noindent here introducing
+
+\begin{align}
+&\nu_{n}(\rho) = \int_{0}^{\infty} \frac{H_{y,n}^{i} H_{y}^{t*}(\rho)}{\epsilon_{r}} \, dx\\
+&f(\rho ',\rho) = \int_{0}^{\infty} \frac{H_{y}^{r} (\rho ') H_{y}^{t*} (\rho)}{\epsilon_{r}} \, dx
+\end{align}
+
+Combining the results as $\beta_{m} \nu_{m} (\rho)$ \eqref{eq:orthogonalized-one-qt-tm} $ + \; \kappa_{m}(\rho)$ \eqref{eq:orthogonalized-two-qt-tm} gives a single equation which may be solved for $q^{t}$:
+
+\begin{align}
+2 \beta_{m} \nu_{m}(\rho) \kappa_{m}(\rho)
+&+ \sum_{n} a_{n} (\beta_{m}\nu_{m}(\rho) \kappa_{n}(\rho) - \beta_{n}\nu_{n}(\rho) \kappa_{m}(\rho)) \nonumber \\
+&+ \int_{0}^{\infty} q^{r} (\rho ') (\beta_{m}\nu_{m}(\rho)\zeta (\rho ',\rho) - \beta (\rho ')\kappa_{m}(\rho) f(\rho ',\rho)) \, d\rho ' \nonumber \\
+&= q^{t}(\rho) (\beta_{m}\nu_{m}(\rho) P \frac{\omega \epsilon_{o}}{|\beta(\rho)|} + \kappa_{m}(\rho) \beta (\rho) P \frac{\omega \epsilon_{o}}{|\beta (\rho)|}) \nonumber \\
+&= q^{t}(\rho) (\beta_{m}\nu_{m}(\rho) + \kappa_{m}(\rho)\beta (\rho)) P \frac{\omega \epsilon_{o}}{|\beta(\rho)|} \nonumber
+\end{align}
+
+\begin{equation}
+\begin{split}
+\Rightarrow
+q^{t}(\rho) = 
+\frac{1}{\omega \epsilon_{o} P} \frac{|\beta (\rho)|}{\beta_{m}\nu_{m}(\rho) + \kappa_{m}(\rho) \beta (\rho)}
+\bigg\{2 \beta_{m} \nu_{m}(\rho) \kappa_{m}(\rho) \\
++ \sum_{n} a_{n} (\beta_{m}\nu_{m}(\rho) \kappa_{n}(\rho) - \beta_{n}\nu_{n}(\rho) \kappa_{m}(\rho)) \vphantom{\int_{0}^{\infty}} \\
++ \int_{0}^{\infty} q^{r} (\rho ') (\beta_{m}\nu_{m}(\rho)\zeta (\rho ',\rho) - \beta (\rho ')\kappa_{m}(\rho) f(\rho ',\rho)) \, d\rho ' \bigg\}
+\end{split}
+\end{equation}
+
+\noindent This formula matches that in the Appendix of Gelin 1981, except that I have substituted $f$ and $\zeta$ in place of the explicit overlap integrals.
+
+\subsection{Source Code}
+
+\begin{lstlisting}
+integral = np.trapz(qr1 * (Bo*vm*z - Bc1*kpm*f), x=p1, axis=1)
+sigma = np.sum([(Bo*vm*kp[n] - Bm[n]*V[n]*kpm) * am[n] for n in range(N)], axis=0)
+qt = 1/(w*eo*P) * abs(Bc) / (Bo*vm+Bc*kpm) * (2*Bo*vm*kpm + integral + sigma)
+\end{lstlisting}
+
+\subsection{Solving for $a_{n}$}
+
+As above, we will combine the primary equations using orthogonality to extract the coefficients. This time we will multiply each term in \eqref{eq:primary-one} by $ H_{y,n}^{r*} / \epsilon_{r}$ (note that the summation index will be changed to k - it will disappear almost immediately so don't worry about it!):
+
+\begin{align}
+&\int_{0}^{\infty} \frac{H_{y,m}^{i} H_{y,n}^{r*}}{\epsilon_{r}} \, dx
++ \sum_{k} a_{k} \int_{0}^{\infty}  \frac{H_{y,k}^{r} H_{y,n}^{r*}}{\epsilon_{r}}\, dx 
++ \int_{0}^{\infty} q^{r} (\rho ') \int_{0}^{\infty} \frac{H_{y}^{r} (\rho ') H_{y,n}^{r*}}{\epsilon_{r}} \, dx \, d\rho ' \nonumber \\
+&= \int_{0}^{\infty} q^{t} (\rho ') \int_{0}^{\infty} \frac{H_{y}^{t} (\rho ') H_{y,n}^{r*}}{\epsilon_{r}} \, dx \, d\rho '
+\end{align}
+
+\noindent Orthogonality eliminates virtually all the terms on the left side.
+
+\begin{align}
+P \frac{\omega \epsilon_{o}}{\beta_{m}}\delta_{m,n} + \sum_{k} &a_{k} P \frac{\omega \epsilon_{o}}{\beta_{n}}\delta_{k,n}
+= \int_{0}^{\infty} q^{t} (\rho ') \nu_{n}(\rho ') \, d\rho ' \nonumber \\
+&a_{n} P \frac{\omega \epsilon_{o}}{\beta_{n}}
+= -P \frac{\omega \epsilon_{o}}{\beta_{n}}\delta_{m,n} + \int_{0}^{\infty} q^{t} (\rho ') \nu_{n}(\rho ') \, d\rho ' \nonumber \\
+&a_{n} = \frac{\beta_{n}}{\omega \epsilon_{o} P} \left\{\int_{0}^{\infty} q^{t} (\rho ') \nu_{n}(\rho ') \, d\rho ' -P \frac{\omega \epsilon_{o}}{\beta_{n}}\delta_{m,n} \right\} \nonumber \\
+&a_{n} = \frac{1}{\omega \epsilon_{o} P} \left\{\int_{0}^{\infty} q^{t} (\rho ') \beta_{n}\nu_{n}(\rho ') \, d\rho ' -P \omega \epsilon_{o}\delta_{m,n} \right\}
+\label{eq:an-tm-1}
+\end{align}
+
+\noindent Repeating the process for \eqref{eq:primary-two}, but excluding the factor of $1/\epsilon_{r}$:
+
+\begin{align}
+&\beta_{m}\int_{0}^{\infty} \frac{H_{y,m}^{i} H_{y,n}^{r*}}{\epsilon_{r}} \, dx
+- \sum_{k} a_{k} \beta_{k} \int_{0}^{\infty}  \frac{H_{y,k}^{r} H_{y,n}^{r*}}{\epsilon_{r}}\, dx 
+- \int_{0}^{\infty} q^{r} (\rho ') \beta(\rho ')\int_{0}^{\infty} \frac{H_{y}^{r} (\rho ') H_{y,n}^{r*}}{\epsilon_{r}} \, dx \, d\rho ' \nonumber \\
+&= \int_{0}^{\infty} q^{t} (\rho ') \beta(\rho ')\int_{0}^{\infty} H_{y}^{t} (\rho ') H_{y,n}^{r*} \, dx \, d\rho '
+\end{align}
+
+\begin{align}
+\beta_{m} P \frac{\omega \epsilon_{o}}{\beta_{m}}\delta_{m,n} - \sum_{k} &a_{k} \beta_{k} P \frac{\omega \epsilon_{o}}{\beta_{n}}\delta_{k,n}
+= \int_{0}^{\infty} q^{t} (\rho ') \beta(\rho ') \kappa_{n}(\rho ') \, d\rho ' \nonumber \\
+&-a_{n} P \omega \epsilon_{o}
+= -P \omega \epsilon_{o}\delta_{m,n} + \int_{0}^{\infty} q^{t} (\rho ') \beta(\rho ') \kappa_{n}(\rho ') \, d\rho ' \nonumber \\
+&a_{n} = \frac{1}{\omega \epsilon_{o} P} \left\{-\int_{0}^{\infty} q^{t} (\rho ') \beta(\rho ')\kappa_{n}(\rho ') \, d\rho ' +P \omega \epsilon_{o}\delta_{m,n} \right\}
+\label{eq:an-tm-2}
+\end{align}
+
+Combining \eqref{eq:an-tm-1} + \eqref{eq:an-tm-2} yields:
+
+\begin{align}
+2 a_{n} &= \frac{1}{\omega \epsilon_{o} P} \left\{\int_{0}^{\infty} q^{t} (\rho ') [\beta_{n}\nu_{n}(\rho ') - \beta(\rho ')\kappa_{n}(\rho ')] +P \omega \epsilon_{o}\delta_{m,n} - P \omega \epsilon_{o}\delta_{m,n} \; d\rho ' \right\} \nonumber \\
+a_{n} &= \frac{1}{2 \omega \epsilon_{o} P} \left\{\int_{0}^{\infty} q^{t} (\rho ') [\beta_{n}\nu_{n}(\rho ') - \beta(\rho ')\kappa_{n}(\rho ')] \, d\rho ' \right\}
+\end{align}
+
+
+\subsection{Source Code}
+
+\begin{lstlisting}
+am = np.array([ (1/(2*w*eo*P) * np.trapz(qt * (Bm[n]*V[n] - Bc*kp[n]), x=p, axis=0)) for n in range(N) ])
+\end{lstlisting}
+
+
+
+
+
+
+\subsection{Solving for $q^{r}$}
+
+Once again, we will combine the primary equations using orthogonality to extract the coefficients. This time we will multiply each term in \eqref{eq:primary-one} by $ H_{y}^{r*}(\rho) / \epsilon_{r}$:
+
+\begin{align}
+&\int_{0}^{\infty} \frac{H_{y,m}^{i} H_{y}^{r*}(\rho)}{\epsilon_{r}} \, dx
++ \sum_{k} a_{k} \int_{0}^{\infty}  \frac{H_{y,k}^{r} H_{y}^{r*}(\rho)}{\epsilon_{r}}\, dx 
++ \int_{0}^{\infty} q^{r} (\rho ') \int_{0}^{\infty} \frac{H_{y}^{r} (\rho ') H_{y}^{r*}(\rho)}{\epsilon_{r}} \, dx \, d\rho ' \nonumber \\
+&= \int_{0}^{\infty} q^{t} (\rho ') \int_{0}^{\infty} \frac{H_{y}^{t} (\rho ') H_{y}^{r*}(\rho)}{\epsilon_{r}} \, dx \, d\rho '
+\end{align}
+
+\noindent Orthogonality eliminates virtually all the terms on the left side.
+
+\begin{align}
+\int_{0}^{\infty} q^{r}(\rho ') \int_{0}^{\infty} \frac{H_{y}^{r}(\rho ') H_{y}^{r*}(\rho)}{\epsilon_{r}} \; dx \, d\rho '= \int_{0}^{\infty} q^{t} (\rho ') f(\rho, \rho ') \, d\rho ' \nonumber \\
+\int_{0}^{\infty} q^{r}(\rho ') \frac{P \omega \epsilon_{o}}{|\beta(\rho)|}\delta(\rho '-\rho) \, d\rho '
+= \int_{0}^{\infty} q^{t} (\rho ') f(\rho, \rho ') \, d\rho ' \nonumber \\
+q^{r}(\rho ) \frac{P \omega \epsilon_{o}}{|\beta(\rho)|} = \int_{0}^{\infty} q^{t} (\rho ') f(\rho, \rho ') \, d\rho ' \nonumber \\
+q^{r}(\rho ) = \frac{|\beta(\rho)|}{\omega \epsilon_{o} P} \int_{0}^{\infty} q^{t} (\rho ') f(\rho, \rho ') \, d\rho ' \nonumber \\
+q^{r}(\rho ) = \frac{1}{\omega \epsilon_{o} P} \frac{|\beta(\rho)|}{\beta(\rho)} \int_{0}^{\infty} q^{t} (\rho ') \beta(\rho) f(\rho, \rho ') \, d\rho '
+\label{eq:qt-tm-1}
+\end{align}
+
+\noindent Repeating the process for \eqref{eq:primary-two}, but excluding the factor of $1/\epsilon_{r}$:
+
+\begin{align}
+&\beta_{m}\int_{0}^{\infty} \frac{H_{y,m}^{i} H_{y}^{r*}(\rho)}{\epsilon_{r}} \, dx
+- \sum_{k} a_{k} \beta_{k} \int_{0}^{\infty}  \frac{H_{y,k}^{r} H_{y}^{r*}(\rho)}{\epsilon_{r}}\, dx 
+- \int_{0}^{\infty} q^{r} (\rho ') \beta(\rho ')\int_{0}^{\infty} \frac{H_{y}^{r} (\rho ') H_{y}^{r*}(\rho)}{\epsilon_{r}} \, dx \, d\rho ' \nonumber \\
+&= \int_{0}^{\infty} q^{t} (\rho ') \beta(\rho ')\int_{0}^{\infty} H_{y}^{t} (\rho ') H_{y}^{r*}(\rho) \, dx \, d\rho '
+\end{align}
+
+\begin{align}
+-\int_{0}^{\infty} q^{r}(\rho ') \beta(\rho ') \int_{0}^{\infty} \frac{H_{y}^{r}(\rho ') H_{y}^{r*}(\rho)}{\epsilon_{r}} \; dx \, d\rho '= \int_{0}^{\infty} q^{t} (\rho ') \beta(\rho ') \zeta(\rho, \rho ') \, d\rho ' \nonumber \\
+-\int_{0}^{\infty} q^{r}(\rho ') \beta(\rho ') \frac{P \omega \epsilon_{o}}{|\beta(\rho)|}\delta(\rho '-\rho) \, d\rho '
+= \int_{0}^{\infty} q^{t} (\rho ') \beta(\rho ') \zeta(\rho, \rho ') \, d\rho ' \nonumber \\
+-q^{r}(\rho ) \beta(\rho ') \frac{P \omega \epsilon_{o}}{|\beta(\rho)|} = \int_{0}^{\infty} q^{t} (\rho ') \beta(\rho ')  \zeta(\rho, \rho ') \, d\rho ' \nonumber \\
+q^{r}(\rho ) = -\frac{1}{\omega \epsilon_{o} P} \frac{|\beta(\rho)|}{\beta(\rho)}\int_{0}^{\infty} q^{t} (\rho ') \beta(\rho ') \zeta(\rho, \rho ') \, d\rho '
+\label{eq:qt-tm-2}
+\end{align}
+
+Combining \eqref{eq:qt-tm-1} + \eqref{eq:qt-tm-2} yields:
+
+\begin{align}
+2 q^{r}(\rho ) &= \frac{1}{\omega \epsilon_{o} P} \frac{|\beta(\rho)|}{\beta(\rho)}\int_{0}^{\infty} q^{t} (\rho ') [\beta(\rho) f(\rho, \rho ') - \beta(\rho ') \zeta(\rho, \rho ')] \, d\rho ' \nonumber \\
+q^{r}(\rho ) &= \frac{1}{2 \omega \epsilon_{o} P} \frac{|\beta(\rho)|}{\beta(\rho)}\int_{0}^{\infty} q^{t} (\rho ') [\beta(\rho) f(\rho, \rho ') - \beta(\rho ') \zeta(\rho, \rho ')] \, d\rho '
+\end{align}
+
+\subsection{Source Code}
+
+\begin{lstlisting}
+integral = np.trapz(qt1 * (Bc2 * f.transpose(1,0,2) - Bc1 * z.transpose(1,0,2)), x=p1, axis=1)	
+qr = 1/(2*w*eo*P) * (abs(Bc)/Bc) * integral
+\end{lstlisting}
+
+%%% TE Primary Equations %%%
+\newpage
+\section{TE Even Modes}
+\subsection{Primary Equations}
+
+Begin with a statement of the continuity of transverse fields across the end facet boundary:
+\begin{align}
+E_{y,m}^{i} + \sum_{n} a_{n} E_{y,n}^{r} + \int_{0}^{\infty} q^{r}(\rho) E_{y}^{r}(\rho) \; d\rho &= \int_{0}^{\infty} q^{t} (\rho) E_{y}^{t} (\rho) \; d\rho \\
+H_{x,m}^{i} + \sum_{n} a_{n} H_{x,n}^{r} + \int_{0}^{\infty} q^{r}(\rho) H_{x}^{r}(\rho) \; d\rho &= \int_{0}^{\infty} q^{t} (\rho) H_{x}^{t} (\rho) \; dp \label{eq:hx-continuity}
+\end{align}
+
+
+\noindent Substituting \eqref{eq:hx-def} into \eqref{eq:hx-continuity} and canceling the $\omega$s and $\mu$s, we now have the primary equations:
+
+\begin{align}
+E_{y,m}^{i} + \sum_{n} a_{n} E_{y,n}^{r} + \int_{0}^{\infty} q^{r}(\rho) E_{y}^{r}(\rho) \; d\rho &= \int_{0}^{\infty} q^{t} (\rho) E_{y}^{t} (\rho) \; d\rho \label{eq:te-primary-one}\\
+-\beta_{m} E_{y,m}^{i} + \sum_{n} a_{n} \beta_{n} E_{y,n}^{r} + \int_{0}^{\infty} q^{r}(\rho) \beta (\rho) E_{y}^{r}(\rho) \; d\rho &= -\int_{0}^{\infty} q^{t} (\rho) \beta (\rho) E_{y}^{t} (\rho) \; d\rho \\
+\Rightarrow \beta_{m} E_{y,m}^{i} - \sum_{n} a_{n} \beta_{n} E_{y,n}^{r} - \int_{0}^{\infty} q^{r}(\rho) \beta (\rho) E_{y}^{r}(\rho) \; d\rho &= \int_{0}^{\infty} q^{t} (\rho) \beta (\rho) E_{y}^{t} (\rho) \; d\rho
+\label{eq:te-primary-two}
+\end{align} 
+
+\subsection{Solving for $q^{t}$}
+\label{sec:qt-te}
+
+We're going to isolate $q^{t}(\rho)$. Dummy variables of integration will be indicated as $\rho '$ for distinction. Begin by multiplying each term in \eqref{eq:te-primary-one} by $ E_{y}^{t*}(\rho)$ and integrating over all space:
+
+\begin{align}
+&\int_{0}^{\infty} E_{y,m}^{i} E_{y}^{t*}(\rho) \, dx
++ \sum_{n} a_{n} \int_{0}^{\infty}  E_{y,n}^{r} E_{y}^{t*}(\rho) \, dx 
++ \int_{0}^{\infty} q^{r} (\rho ') \int_{0}^{\infty} E_{y}^{r} (\rho ') E_{y}^{t*} (\rho) \, dx \, d\rho ' \nonumber \\
+&= \int_{0}^{\infty} q^{t} (\rho ') \int_{0}^{\infty} E_{y}^{t} (\rho ') E_{y}^{t*} (\rho) \, dx \, d\rho '
+\end{align}
+
+\noindent From \eqref{eq:orthogonality-te}, we can eliminate all but our target mode with wave vector $\rho$:
+
+\begin{align}
+\frac{1}{2}G_{m}(\rho)
++ \frac{1}{2} \sum_{n} a_{n} G_{n}(\rho)
++ \frac{1}{2} \int_{0}^{\infty} q^{r} (\rho ') F(\rho ',\rho) \, d\rho '
+&= \int_{0}^{\infty} q^{t} (\rho ') \left(-P \frac{\omega \mu}{|\beta (\rho)|} \delta (\rho '-\rho) \right) \, d\rho ' \nonumber \\
+&= q^{t}(\rho) \cdot P \frac{\omega \mu}{|\beta (\rho)|}
+\label{eq:orthogonalized-one-qt-te}
+\end{align}
+
+\noindent where we have introduced the functions
+
+\begin{align}
+&G_{n}(\rho) = \int_{-\infty}^{\infty} E_{y,n}^{i} E_{y}^{t*}(\rho) \, dx\\
+&F (\rho ',\rho) = \int_{-\infty}^{\infty} E_{y}^{r} (\rho ') E_{y}^{t*} (\rho) \, dx
+\end{align}
+
+We can repeat this procedure for \eqref{eq:te-primary-two}, producing
+
+\begin{align}
+\frac{1}{2} \beta_{m} G_{m}(\rho)
+- \frac{1}{2} \sum_{n} a_{n} \beta_{n} G_{n}(\rho)
+- \frac{1}{2} \int_{0}^{\infty} q^{r} (\rho ') \beta (\rho ') F(\rho ',\rho) \, d\rho '
+= -q^{t}(\rho) \beta (\rho) \cdot P \frac{\omega \mu}{|\beta (\rho)|}
+\label{eq:orthogonalized-two-qt-te}
+\end{align}
+
+Combining the results as $\beta_{m} (\rho)$ \eqref{eq:orthogonalized-one-qt-te} $ + $ \eqref{eq:orthogonalized-two-qt-te} gives a single equation which may be solved for $q^{t}$:
+
+\begin{align}
+G_{m} \beta_{m} + \frac{1}{2} \sum_{n} a_{n} (\beta_{m}-\beta_{n}) G_{n} + \frac{1}{2} \int_{0}^{\infty} q^{r} (\rho ') (\beta_{m} - \beta(\rho ')) F(\rho ', \rho) \; d\rho ' \nonumber \\
+= q^{t}(\rho) (\beta_{m} + \beta(\rho)) \cdot P \frac{\omega \mu}{|\beta (\rho)|}
+\end{align}
+
+\begin{equation}
+\begin{split}
+\Rightarrow
+q^{t}(\rho) = 
+\frac{1}{2 \omega \mu P} \frac{|\beta (\rho)|}{\beta_{m} + \beta (\rho)}
+\bigg\{2 \beta_{m} G_{m}(\rho) + \sum_{n} a_{n} (\beta_{m} - \beta_{n}) G_{n}(\rho) \vphantom{\int_{0}^{\infty}} \\
++ \int_{0}^{\infty} q^{r} (\rho ') (\beta_{m} - \beta (\rho ')) F(\rho ',\rho) \, d\rho ' \bigg\}
+\end{split}
+\end{equation}
+
+\noindent This formula matches (5) in Gelin 1981.
+
+\subsection{Source Code}
+
+\begin{lstlisting}
+qr1 = np.tile(qr,(len(p),1,1))
+integral = np.trapz(qr1 * (Bo-Bc1) * F, x=p1, axis=1)
+# integral = np.sum(qr1 * (Bo-Bc1) * F, axis=1) * dp
+sigma = np.sum([(Bo-Bm[n]) * am[n] * G[n,:] for n in range(N)], axis=0)
+qt = 1/(2*w*mu*P) * abs(Bc) / (Bo+Bc) * (2*Bo*G[incident_mode,:] + integral + sigma)
+\end{lstlisting}
+
+
+\subsection{$a_{n}$}
+
+Begin with the primary equations. Multiply each term by $E_{y,n}^{r*}$ and integrate $x$ from 0 to infinity. Equation \eqref{eq:te-primary-one} becomes:
+
+\begin{align*}
+0 + \sum_{k} a_{k} \int_{0}^{\infty} E_{y,k}^{r} E_{y,n}^{r*} \; dx + 0 &= \int_{0}^{\infty} q^{t} (\rho ') \int_{0}^{\infty} E_{y}^{t}(\rho ') E_{y,n}^{r*} \; dx \; d\rho ' \\
+a_{n} \cdot \left( P \frac{\omega \mu}{\beta_{n}} \right) &= \frac{1}{2} \int_{0}^{\infty} q^{t} (\rho ') G_{n} (\rho ') \; d\rho' \\
+\end{align*}
+
+\noindent Similarly, \eqref{eq:te-primary-two} becomes:
+
+\begin{align*}
+0 - \sum_{k} a_{k}\beta_{k} \int_{0}^{\infty} E_{y,k}^{r} E_{y,n}^{r*} \; dx + 0 &= \int_{0}^{\infty} q^{t} (\rho ') \beta (\rho ') \int_{0}^{\infty} E_{y}^{t}(\rho ') E_{y,n}^{r*} \; dx \; d\rho ' \\
+a_{n} \beta_{n} \cdot \left( -P \frac{\omega \mu}{\beta_{n}} \right) &= \frac{1}{2} \int_{0}^{\infty} q^{t} (\rho ') \beta(\rho ')G_{n} (\rho ') \; d\rho' \\
+a_{n} \cdot \left( P \omega \mu \right) &= -\frac{1}{2} \int_{0}^{\infty} q^{t} (\rho ') \beta(\rho ') G_{n} (\rho ') \; d\rho'
+\end{align*}
+
+\noindent
+
+Adding $\beta_{n}$ times the former result to the latter yields, thus:
+
+\begin{align}
+2 &a_{n} \cdot \left( P \omega \mu \right) = \frac{1}{2} \int_{0}^{\infty} q^{t} (\rho ') (\beta_{n} - \beta(\rho ')) G_{n} (\rho ') \; d\rho' \nonumber \\
+\Rightarrow \; &a_{n} = \frac{1}{4 \omega \mu P} \int_{0}^{\infty} q^{t} (\rho ') (\beta_{n} - \beta(\rho ')) G_{n} (\rho ') \; d\rho' \\
+\end{align}
+
+\subsection{Source Code}
+
+\begin{lstlisting}
+am = np.array([ (1/(4*w*mu*P) * np.trapz(qt * (Bm[n]-Bc) * G[n,:], x=p, axis=0)) for n in range(N) ])
+\end{lstlisting}
+
+
+
+\subsection{$q^{r}$}
+
+Begin with the primary equations. Multiply each term by $E_{y}^{r*}(\rho)$ and integrate $x$ from 0 to infinity. Equation \eqref{eq:te-primary-one} becomes:
+
+\begin{align*}
+0 + 0 + \int_{0}^{\infty} q^{r}(\rho) \int_{0}^{\infty} E_{y}^{r} (\rho ') E_{y}^{r*} (\rho) \; dx \; d\rho ' &= \int_{0}^{\infty} q^{t} (\rho ') \int_{0}^{\infty} E_{y}^{t}(\rho ') E_{y}^{r*}(\rho) \; dx \; d\rho ' \\
+q^{r}(\rho) \cdot \left( P \frac{\omega \mu}{|\beta (\rho)|} \right) &= \frac{1}{2} \int_{0}^{\infty} q^{t} (\rho ') F^{*}(\rho, \rho') \; d\rho'
+\end{align*}
+
+\noindent Similarly, \eqref{eq:te-primary-two} becomes:
+
+\begin{align*}
+0 + 0 - \int_{0}^{\infty} q^{r}(\rho) \beta(\rho ') \int_{0}^{\infty} E_{y}^{r} (\rho ') E_{y}^{r*} (\rho) \; dx \; d\rho ' &= \int_{0}^{\infty} q^{t} (\rho ') \beta (\rho ') \int_{0}^{\infty} E_{y}^{t}(\rho ') E_{y}^{r*}(\rho) \; dx \; d\rho ' \\
+\beta(\rho) q^{r}(\rho) \cdot \left( P \frac{\omega \mu}{|\beta (\rho)|} \right) &= -\frac{1}{2} \int_{0}^{\infty} q^{t} (\rho ') \beta (\rho ') F^{*}(\rho, \rho') \; d\rho'
+\end{align*}
+
+\noindent
+
+Adding $\beta (\rho)$ times the former result to the latter yields, thus:
+
+\begin{align}
+2 \beta(\rho) &q^{r} \cdot \left( \frac{P \omega \mu}{|\beta(\rho)|} \right) = \frac{1}{2} \int_{0}^{\infty} q^{t} (\rho ') (\beta (\rho) - \beta(\rho ')) F^{*}(\rho, \rho ') \; d\rho' \nonumber \\
+\Rightarrow \; &q^{r} = \frac{1}{4 \omega \mu P} \frac{|\beta(\rho)|}{\beta(\rho)} \int_{0}^{\infty} q^{t} (\rho ') (\beta (\rho) - \beta(\rho ')) F^{*}(\rho, \rho ') \; d\rho'
+\end{align}
+
+\subsection{Source Code}
+
+\begin{lstlisting}
+integral = np.trapz(qt1 * (Bc2-Bc1) * F.transpose(1,0,2), x=p1, axis=1)
+# integral = np.sum(qt1 * (Bc2-Bc1) * F.transpose(1,0,2), axis=1) * dp
+qr = 1/(4*w*mu*P) * (abs(Bc)/Bc) * integral
+\end{lstlisting}
+
+
+
+
+
+%%% COEFFICIENTS %%%
+
+\newpage
+
+\section{Derivation of the Mode Amplitude Coefficients}
+\label{sec:coefficients}
+
+\subsection{TM Even - Guided Modes}
+
+\begin{align*}
+P &= \int_{0}^{d} \frac{\beta_{n}}{\omega \epsilon} |A_{n}|^{2} \cos^{2}(\kappa_{n} x) \; dx + \int_{d}^{\infty} \frac{\beta_{n}}{\omega \epsilon_{o}} |A_{n}|^{2} \cos^{2}(\kappa_{n}d) e^{2 \gamma d} e^{-2 \gamma x} \; dx \\
+&= \frac{\beta_{n} |A|^{2}}{\omega \epsilon_{o}} \left[ \int_{0}^{d}  \frac{1}{\epsilon_{r}} \cos^{2}(\kappa_{n} x) \; dx + \cos^{2}(\kappa_{n}d) e^{2 \gamma d} \int_{d}^{\infty} e^{-2 \gamma x} \; dx \right] \\
+&= \frac{\beta_{n} |A|^{2}}{\omega \epsilon_{o}} \left[  \frac{2\kappa_{n} d + \sin(2\kappa_{n} d)}{4\kappa_{n} \epsilon_{r}} + \cos^{2}(\kappa_{n}d) e^{2 \gamma d} \left( \frac{1}{-2 \gamma} e^{-2 \gamma x}\right) \bigg|_{d}^{\infty} \right] \\
+&= \frac{\beta_{n} |A|^{2}}{\omega \epsilon_{o}} \left[  \frac{2\kappa_{n} d + \sin(2\kappa_{n} d)}{4\kappa_{n} \epsilon_{r}} + \cos^{2}(\kappa_{n}d) e^{2 \gamma d} \frac{1}{2 \gamma} e^{-2 \gamma d} \right] \\
+&= \frac{\beta_{n} |A|^{2}}{\omega \epsilon_{o}} \left[  \frac{2\kappa_{n} d + \sin(2\kappa_{n} d)}{4\kappa_{n} \epsilon_{r}} + \frac{\cos^{2}(\kappa_{n}d)}{2 \gamma} \right] \\
+\Rightarrow A &= \sqrt{\frac{\omega \epsilon_{o} P}{\beta_{n} \cdot \psi}}
+\end{align*}
+
+where $\psi = \left[  \frac{2\kappa_{n} d + \sin(2\kappa_{n} d)}{4\kappa_{n} \epsilon_{r}} + \frac{\cos^{2}(\kappa_{n}d)}{2 \gamma} \right]$.
+
+\subsection{Source Code}
+
+\noindent Note that this formula is not the one used by Marcuse, but the values seem to match within $10^{-14}$.
+
+\begin{lstlisting}
+psi = (2*Km*d + sin(2*Km*d))/(4*Km*eps) + cos(Km*d)**2/(2*gm)
+Am = sqrt(w*eo*P/(Bm*psi))
+\end{lstlisting}
+
+\subsection{TM Even - Radiation Modes}
+
+The derivation of the coefficients for Radiation Modes is provided in Marcuse's book, "Light Transmission Optics", pp. 316-318. The result is reprinted in his 1969 paper "Radiation Losses of Tapered Dielectric Slab Waveguides", and the formulae match. Gelin reprints the formula, although he includes a factor of $\epsilon^{2}$ where Marcuse would have just $\epsilon$.
+
+\subsection{TE Even - Guided Modes}
+
+\begin{align*}
+P &= \int_{0}^{d} \frac{\beta_{n}}{\omega \mu} |A_{n}|^{2} \cos^{2}(\kappa_{n} x) \; dx + \int_{d}^{\infty} \frac{\beta_{n}}{\omega \mu} |A_{n}|^{2} \cos^{2}(\kappa_{n}d) e^{2 \gamma d} e^{-2 \gamma x} \; dx \\
+&= \frac{\beta_{n} |A|^{2}}{\omega \mu} \left[ \int_{0}^{d} \cos^{2}(\kappa_{n} x) \; dx + \cos^{2}(\kappa_{n}d) e^{2 \gamma d} \int_{d}^{\infty} e^{-2 \gamma x} \; dx \right] \\
+&= \frac{\beta_{n} |A|^{2}}{\omega \mu} \left[  \frac{2\kappa_{n} d + \sin(2\kappa_{n} d)}{4\kappa_{n}} + \cos^{2}(\kappa_{n}d) e^{2 \gamma d} \left( \frac{1}{-2 \gamma} e^{-2 \gamma x}\right) \bigg|_{d}^{\infty} \right] \\
+&= \frac{\beta_{n} |A|^{2}}{\omega \mu} \left[  \frac{2\kappa_{n} d + \sin(2\kappa_{n} d)}{4\kappa_{n}} + \cos^{2}(\kappa_{n}d) e^{2 \gamma d} \frac{1}{2 \gamma} e^{-2 \gamma d} \right] \\
+&= \frac{\beta_{n} |A|^{2}}{\omega \mu} \left[  \frac{2\kappa_{n} d + \sin(2\kappa_{n} d)}{4\kappa_{n} } + \frac{\cos^{2}(\kappa_{n}d)}{2 \gamma} \right] \\
+&= \frac{\beta_{n} |A|^{2}}{2 \omega \mu} \left[  \frac{2\kappa_{n} d + \sin(2\kappa_{n} d)}{2\kappa_{n} } + \frac{\cos^{2}(\kappa_{n}d)}{ \gamma} \right] \\
+&= \frac{\beta_{n} |A|^{2}}{2 \omega \mu} \left[  \frac{2\kappa_{n} d + \sin(2\kappa_{n} d)}{2\kappa_{n} } + \frac{1 + \cos(2 \kappa_{n}d)}{2 \gamma} \right] \\
+\end{align*}
+
+%%% Overlap Integrals %%%
+
+\newpage
+
+\section{Derivation of the Overlap Integral Functions}
+
+\subsection{Fields of the Even Modes}
+
+For even guided modes, the fields are given by 
+
+\[\phi_{y,n}(x) = \left\{
+  \begin{array}{lr}
+    A_{n}\cos(\kappa x) & : |x| < d\\
+    A_{n}\cos(\kappa d)e^{\gamma d}e^{-\gamma x} & : |x| \ge d
+  \end{array}
+\right.
+\]
+
+\noindent where $\phi$ stands for either $E$ or $H$, depending on the polarization. The radiation/continuum modes are
+
+\[\phi_{y}(x, \rho) = \left\{
+  \begin{array}{lr}
+    B_{n}^{r}\cos(\sigma x) & : |x| < d\\
+    B_{n}^{r}\left[De^{-i\rho |x|} + D^{*}e^{-i\rho |x|}\right] & : |x| \ge d
+  \end{array}
+\right.
+\]
+
+\noindent Note that $A, B,$ and $D$ depend on the polarization. (See section \ref{sec:coefficients}).  Finally, the free-space modes in the right half-space are described by:
+
+\[\phi_{y}(x,\rho) = B^{t}\cos(\rho x)\]
+
+\subsection{$\kappa_{n}(\rho)$}
+
+Recalling the definition from section \ref{sec:qt-tm}:
+
+\begin{align}
+&\kappa_{n}(\rho) = \int_{0}^{\infty} H_{y,n}^{i} H_{y}^{t*}(\rho) \, dx \nonumber
+\end{align}
+
+\noindent Using the definition of the fields for even TM modes, we get the following:
+
+\begin{align*}
+\kappa_{n}(\rho) &= \int_{0}^{d} A_{n}\cos(\kappa x) B^{t}\cos(\rho x) \, dx + \int_{d}^{\infty} A_{n}\cos(\kappa d)e^{\gamma d}e^{-\gamma x} B^{t}\cos(\rho x) \, dx \\
+&= A_{n}B^{t} \left\{ \int_{0}^{d} \cos(\kappa x) \cos(\rho x) \, dx + \cos(\kappa d)e^{\gamma d} \int_{d}^{\infty} e^{-\gamma x} \cos(\rho x) \, dx \right\} \\
+&= A_{n}B^{t} \bigg\{ \frac{\kappa\sin(\kappa x) \cos(\rho x) - \rho\sin(\rho x) \cos(\kappa x)}{\kappa^{2}-\rho^{2}} \Big|_{0}^{d}  \\
+	&\hspace{132px} {} + \cos(\kappa d)e^{\gamma d} \frac{e^{-\gamma x}(\rho \sin(\rho x) - \gamma \cos(\rho x))}{\gamma^{2} + \rho^{2}} \Big|_{d}^{\infty}  \bigg\} \\
+&= A_{n}B^{t} \bigg\{ \frac{\kappa\sin(\kappa d) \cos(\rho d) - \rho\sin(\rho d) \cos(\kappa d)}{\kappa^{2}-\rho^{2}}  \\
+	&\hspace{132px} {} - \cos(\kappa d)e^{\gamma d} \frac{e^{-\gamma d}(\rho \sin(\rho d) - \gamma \cos(\rho d))}{\gamma^{2} + \rho^{2}}  \bigg\} \\
+&= A_{n}B^{t} \cos(\kappa d) \left\{ \frac{\kappa \tan(\kappa d) \cos(\rho d)  - \rho \sin(\rho d)}{\kappa^{2}-\rho^{2}} 
+	- \frac{\rho \sin(\rho d) - \gamma \cos(\rho d)}{\gamma^{2} + \rho^{2}}  \right\} \label{eq:kappa-solution}
+\end{align*}
+
+\subsection{Source Code}
+
+\begin{lstlisting}
+kp[i,:,:] = Am[i] * Bt * cos(Km[i]*d) * ((Km[i]*cos(p*d)*tan(Km[i]*d) - p*sin(p*d))/(     Km[i]**2 - p**2) - (p*sin(p*d) - gm[i]*cos(p*d))/(gm[i]**2 + p**2))
+\end{lstlisting}
+
+
+\subsection{$G_{n}(\rho)$}
+
+\begin{align}
+&G_{n}(\rho) = \int_{-\infty}^{\infty} E_{y,n}^{i} E_{y}^{t*}(\rho) \, dx
+%&F (\rho ',\rho) = \int_{-\infty}^{\infty} E_{y}^{r} (\rho ') E_{y}^{t*} (\rho) \, dx
+\end{align}
+
+
+\begin{align*}
+G_{n}(\rho) &= 2 \int_{0}^{d} A_{n}\cos(\kappa x) B^{t}\cos(\rho x) \, dx + 2\int_{d}^{\infty} A_{n}\cos(\kappa d)e^{\gamma d}e^{-\gamma x} B^{t}\cos(\rho x) \, dx \\
+&= 2A_{n}B^{t} \left\{ \int_{0}^{d} \cos(\kappa x) \cos(\rho x) \, dx + \cos(\kappa d)e^{\gamma d} \int_{d}^{\infty} e^{-\gamma x} \cos(\rho x) \, dx \right\} \\
+&= 2A_{n}B^{t} \bigg\{ \frac{\kappa\sin(\kappa x) \cos(\rho x) - \rho\sin(\rho x) \cos(\kappa x)}{\kappa^{2}-\rho^{2}} \Big|_{0}^{d}  \\
+	&\hspace{132px} {} + \cos(\kappa d)e^{\gamma d} \frac{e^{-\gamma x}(\rho \sin(\rho x) - \gamma \cos(\rho x))}{\gamma^{2} + \rho^{2}} \Big|_{d}^{\infty}  \bigg\} \\
+&= 2A_{n}B^{t} \bigg\{ \frac{\kappa\sin(\kappa d) \cos(\rho d) - \rho\sin(\rho d) \cos(\kappa d)}{\kappa^{2}-\rho^{2}}  \\
+	&\hspace{132px} {} - \cos(\kappa d)e^{\gamma d} \frac{e^{-\gamma d}(\rho \sin(\rho d) - \gamma \cos(\rho d))}{\gamma^{2} + \rho^{2}}  \bigg\} \\
+&= 2A_{n}B^{t} \cos(\kappa d) \left\{ \frac{\kappa \tan(\kappa d) \cos(\rho d)  - \rho \sin(\rho d)}{\kappa^{2}-\rho^{2}} 
+	- \frac{\rho \sin(\rho d) - \gamma \cos(\rho d)}{\gamma^{2} + \rho^{2}}  \right\} \\
+\intertext{Since this function occurs for TE cases only, we can substitute the identity $\kappa \tan (\kappa d) = \gamma$:} 
+&= 2A_{n}B^{t} \cos(\kappa d) \left\{ \frac{\gamma \cos(\rho d)  - \rho \sin(\rho d)}{\kappa^{2}-\rho^{2}} 
+	- \frac{\rho \sin(\rho d) - \gamma \cos(\rho d)}{\gamma^{2} + \rho^{2}}  \right\} \\
+&= 2A_{n}B^{t} \cos(\kappa d) \left\{ \frac{(\kappa^{2} - \rho^{2})(\gamma \cos(\rho d)  - \rho \sin(\rho d)) - (\gamma^{2} + \rho^{2})(\rho \sin(\rho d) - \gamma \cos(\rho d))}{(\kappa^{2}-\rho^{2})(\gamma^{2} + \rho^{2})} \right\} \\
+&= 2A_{n}B^{t} \cos(\kappa d) \left\{ \frac{(\kappa^{2} - \rho^{2} + \gamma^{2} + \rho^{2})(\gamma \cos(\rho d)) - (\kappa^{2} - \rho^{2} + \gamma^{2} + \rho^{2})(\rho \sin(\rho d))}{(\kappa^{2}-\rho^{2})(\gamma^{2} + \rho^{2})} \right\} \\
+&= 2A_{n}B^{t} (\kappa^{2} + \gamma^{2}) \cos(\kappa d) \left\{ \frac{\gamma \cos(\rho d) - \rho \sin(\rho d)}{(\kappa^{2}-\rho^{2})(\gamma^{2} + \rho^{2})} \right\} \\
+\Rightarrow G_{n}(\rho) &= 2A_{n}B^{t} k^{2}(\epsilon_{r} - 1) \cos(\kappa d) \left\{ \frac{\gamma \cos(\rho d) - \rho \sin(\rho d)}{(\kappa^{2}-\rho^{2})(\gamma^{2} + \rho^{2})} \right\}
+\end{align*}
+
+\noindent This formula matches (7) in Gelin 1981.
+
+\subsection{Source Code}
+
+\begin{lstlisting}
+G[i,:,:] = 2 * k**2 * (eps-1) * Am[i] * Bt * cos(Km[i]*d) * (gm[i]*cos(p*d) - p*sin(p*d)) / ((Km[i]**2 - p**2)*(gm[i]**2 + p**2))
+\end{lstlisting}
+
+
+
+\subsection{$\nu_{n}(\rho)$}
+
+\begin{align*}
+&\nu_{n}(\rho) = \frac{\int_{0}^{\infty} H_{y,n}^{i} H_{y}^{t*}(\rho)}{\epsilon_{r}} \, dx \nonumber
+\end{align*}
+
+\noindent Using the definition of the fields for even TM modes, we get the following:
+
+\begin{align*}
+\nu_{n}(\rho) &= \int_{0}^{d} \frac{A_{n}\cos(\kappa x) B^{t}\cos(\rho x)}{\epsilon_{r}} \, dx + \int_{d}^{\infty} A_{n}\cos(\kappa d)e^{\gamma d}e^{-\gamma x} B^{t}\cos(\rho x) \, dx \\
+&= A_{n}B^{t} \left\{ \int_{0}^{d} \frac{\cos(\kappa x) \cos(\rho x)}{\epsilon_{r}} \, dx + \cos(\kappa d)e^{\gamma d} \int_{d}^{\infty} e^{-\gamma x} \cos(\rho x) \, dx \right\} \\
+&= A_{n}B^{t} \bigg\{ \frac{\kappa\sin(\kappa x) \cos(\rho x) - \rho\sin(\rho x) \cos(\kappa x)}{\epsilon_{r}(\kappa^{2}-\rho^{2})} \Big|_{0}^{d}  \\
+	&\hspace{132px} {} + \cos(\kappa d)e^{\gamma d} \frac{e^{-\gamma x}(\rho \sin(\rho x) - \gamma \cos(\rho x))}{\gamma^{2} + \rho^{2}} \Big|_{d}^{\infty}  \bigg\} \\
+&= A_{n}B^{t} \bigg\{ \frac{\kappa\sin(\kappa d) \cos(\rho d) - \rho\sin(\rho d) \cos(\kappa d)}{\epsilon_{r}(\kappa^{2}-\rho^{2})}  \\
+	&\hspace{132px} {} - \cos(\kappa d)e^{\gamma d} \frac{e^{-\gamma d}(\rho \sin(\rho d) - \gamma \cos(\rho d))}{\gamma^{2} + \rho^{2}}  \bigg\} \\
+&= A_{n}B^{t} \cos(\kappa d) \left\{ \frac{\kappa \cos(\rho d) \tan(\kappa d) - \rho\sin(\rho d)}{\epsilon_{r}(\kappa^{2}-\rho^{2})} 
+	- \frac{\rho \sin(\rho d) - \gamma \cos(\rho d)}{\gamma^{2} + \rho^{2}}  \right\} %\label{eq:nu-solution}
+\end{align*}
+
+\subsection{Source Code}
+
+\begin{lstlisting}
+V[i,:,:]  = Am[i] * Bt * cos(Km[i]*d) * ((Km[i]*cos(p*d)*tan(Km[i]*d) - p*sin(p*d))/(eps*(Km[i]**2 - p**2)) - (p*sin(p*d) - gm[i]*cos(p*d))/(gm[i]**2 + p**2))
+\end{lstlisting}
+
+
+\newpage
+
+
+\subsection{$\zeta(\rho ', \rho)$}
+
+\begin{align*}
+&\zeta (\rho ',\rho) = \int_{0}^{\infty} H_{y}^{r} (\rho ') H_{y}^{t*} (\rho) \, dx
+\end{align*}
+
+
+\begin{align*}
+\zeta(\rho ',\rho) &= \int_{0}^{d} B^{r}(\rho ')\cos(\sigma 'x) B^{t}(\rho)\cos(\rho x) \, dx + \int_{d}^{\infty} B^{r}(\rho ')[De^{-i\rho 'x} + D^{*}e^{i\rho 'x}] B^{t}(\rho)\cos(\rho x) \, dx \\
+&= B^{r}(\rho ') B^{t}(\rho) \left\{ \int_{0}^{d} \cos(\sigma 'x) \cos(\rho x) \, dx + \int_{d}^{\infty} \cos(\rho x) \cdot 2 \cdot \text{Re}[De^{-i\rho 'x}] \, dx \right\} \\
+&= B^{r}(\rho ') B^{t}(\rho) \bigg\{ \frac{\sigma '\sin(\sigma 'x) \cos(\rho x) - \rho\cos(\sigma 'x) \sin(\rho x)}{\sigma '^{2}-\rho^{2}} \Big|_{0}^{d}  \\
+	&\hspace{132px} {} + 2 \cdot \text{Re} \bigg[  \int_{d}^{\infty} \cos(\rho x) \cdot De^{-i\rho 'x} \, dx \bigg] \bigg\} \\
+&= B^{r}(\rho ') B^{t}(\rho) \bigg\{ \frac{\sigma '\sin(\sigma 'd) \cos(\rho d) - \rho\cos(\sigma 'd) \sin(\rho d)}{\sigma '^{2}-\rho^{2}} \\
+	&\hspace{132px} {} + 2 \cdot \text{Re} \bigg[  D\frac{e^{-ix\rho '}(-\rho\sin(\rho x) + i\rho '\cos(\rho x))}{\rho '^{2} - \rho^{2}}  \, dx \bigg] \Big|_{d}^{\infty} \bigg\} \\
+&= B^{r}(\rho ') B^{t}(\rho) \bigg\{ \frac{\sigma '\sin(\sigma 'd) \cos(\rho d) - \rho\cos(\sigma 'd) \sin(\rho d)}{\sigma '^{2}-\rho^{2}} \\
+	&\hspace{132px} {} - 2 \cdot \text{Re} \bigg[  D\frac{e^{-ix\rho '}(-\rho\sin(\rho x) + i\rho '\cos(\rho x))}{\rho '^{2} - \rho^{2}} \bigg] \Big|_{0}^{d}\bigg\} \\
+&= B^{r}(\rho ') B^{t}(\rho) \bigg\{ \frac{\sigma '\sin(\sigma 'd) \cos(\rho d) - \rho\cos(\sigma 'd) \sin(\rho d)}{\sigma '^{2}-\rho^{2}} \\
+	&\hspace{132px} {} - 2 \cdot \text{Re} \bigg[  D\frac{e^{-i\rho 'd}(-\rho\sin(\rho d) + i\rho '\cos(\rho d)) - i\rho '}{\rho '^{2} - \rho^{2}} \bigg] \bigg\} \\
+&= B^{r}(\rho ') B^{t}(\rho) \bigg\{ \frac{\sigma '\sin(\sigma 'd) \cos(\rho d) - \rho\cos(\sigma 'd) \sin(\rho d)}{\sigma '^{2}-\rho^{2}} \\
+	&\hspace{132px} {} + 2 \cdot \text{Re} \bigg[  D\frac{e^{-i\rho 'd}(\rho\sin(\rho d) - i\rho '\cos(\rho d)) + i\rho '}{\rho '^{2} - \rho^{2}} \bigg] \bigg\}
+\end{align*}
+
+\subsection{Source Code}
+
+\begin{lstlisting}
+z = Br1*Bt2 * ((o1*sin(od)*cos(pd) - p2*cos(od)*sin(pd))/        (o1**2-p2**2)  + 2*(D1 * (exp(-1j*p1*d) * (p2*sin(pd)-1j*p1*cos(pd))) + 1j*p1 ).real / (p1**2-p2**2) )
+\end{lstlisting}
+
+
+
+
+
+\subsection{$f(\rho ', \rho)$}
+
+\begin{align*}
+&f (\rho ',\rho) = \int_{0}^{\infty} \frac{H_{y}^{r} (\rho ') H_{y}^{t*} (\rho)}{\epsilon_{r}} \, dx
+\end{align*}
+
+
+\begin{align*}
+f(\rho ',\rho) &= \int_{0}^{d} \frac{B^{r}(\rho ')\cos(\sigma 'x) B^{t}(\rho)\cos(\rho x)}{\epsilon_{r}} \, dx + \int_{d}^{\infty} B^{r}(\rho ')[De^{-i\rho 'x} + D^{*}e^{i\rho 'x}] B^{t}(\rho)\cos(\rho x) \, dx \\
+&= B^{r}(\rho ') B^{t}(\rho) \left\{ \int_{0}^{d} \frac{\cos(\sigma 'x) \cos(\rho x)}{\epsilon_{r}} \, dx + \int_{d}^{\infty} \cos(\rho x) \cdot 2 \cdot \text{Re}[De^{-i\rho 'x}] \, dx \right\} \\
+&= B^{r}(\rho ') B^{t}(\rho) \bigg\{ \frac{\sigma '\sin(\sigma 'x) \cos(\rho x) - \rho\cos(\sigma 'x) \sin(\rho x)}{\epsilon_{r}(\sigma '^{2}-\rho^{2})} \Big|_{0}^{d}  \\
+	&\hspace{132px} {} + 2 \cdot \text{Re} \bigg[  \int_{d}^{\infty} \cos(\rho x) \cdot De^{-i\rho 'x} \, dx \bigg] \bigg\} \\
+&= B^{r}(\rho ') B^{t}(\rho) \bigg\{ \frac{\sigma '\sin(\sigma 'd) \cos(\rho d) - \rho\cos(\sigma 'd) \sin(\rho d)}{\epsilon_{r}(\sigma '^{2}-\rho^{2})} \\
+	&\hspace{132px} {} + 2 \cdot \text{Re} \bigg[  D\frac{e^{-ix\rho '}(-\rho\sin(\rho x) + i\rho '\cos(\rho x))}{\rho '^{2} - \rho^{2}}  \, dx \bigg] \Big|_{d}^{\infty} \bigg\} \\
+&= B^{r}(\rho ') B^{t}(\rho) \bigg\{ \frac{\sigma '\sin(\sigma 'd) \cos(\rho d) - \rho\cos(\sigma 'd) \sin(\rho d)}{\epsilon_{r}(\sigma '^{2}-\rho^{2})} \\
+	&\hspace{132px} {} - 2 \cdot \text{Re} \bigg[  D\frac{e^{-ix\rho '}(-\rho\sin(\rho x) + i\rho '\cos(\rho x))}{\rho '^{2} - \rho^{2}} \bigg] \Big|_{0}^{d}\bigg\} \\
+&= B^{r}(\rho ') B^{t}(\rho) \bigg\{ \frac{\sigma '\sin(\sigma 'd) \cos(\rho d) - \rho\cos(\sigma 'd) \sin(\rho d)}{\epsilon_{r}(\sigma '^{2}-\rho^{2})} \\
+	&\hspace{132px} {} - 2 \cdot \text{Re} \bigg[  D\frac{e^{-i\rho 'd}(-\rho\sin(\rho d) + i\rho '\cos(\rho d)) - i\rho '}{\rho '^{2} - \rho^{2}} \bigg] \bigg\} \\
+&= B^{r}(\rho ') B^{t}(\rho) \bigg\{ \frac{\sigma '\sin(\sigma 'd) \cos(\rho d) - \rho\cos(\sigma 'd) \sin(\rho d)}{\epsilon_{r}(\sigma '^{2}-\rho^{2})} \\
+	&\hspace{132px} {} + 2 \cdot \text{Re} \bigg[  D\frac{e^{-i\rho 'd}(\rho\sin(\rho d) - i\rho '\cos(\rho d)) + i\rho '}{\rho '^{2} - \rho^{2}} \bigg] \bigg\}
+\end{align*}
+
+\subsection{Source Code}
+
+\begin{lstlisting}
+f = Br1*Bt2 * ((o1*sin(od)*cos(pd) - p2*cos(od)*sin(pd))/(n**2 * (o1**2-p2**2)) + 2*(D1 * (exp(-1j*p1*d) * (p2*sin(pd)-1j*p1*cos(pd))) + 1j*p1 ).real / (p1**2-p2**2) )
+\end{lstlisting}
+
+
+
+\newpage
+
+
+\subsection{$F(\rho ', \rho)$}
+
+\begin{align*}
+&F(\rho ',\rho) = \int_{-\infty}^{\infty} E_{y}^{r} (\rho ') E_{y}^{t*} (\rho) \, dx
+\end{align*}
+
+
+\begin{align*}
+F(\rho ',\rho) &= 2 \int_{0}^{d} B^{r}(\rho ')\cos(\sigma 'x) B^{t}(\rho)\cos(\rho x) \, dx + 2 \int_{d}^{\infty} B^{r}(\rho ')[De^{-i\rho 'x} + D^{*}e^{i\rho 'x}] B^{t}(\rho)\cos(\rho x) \, dx \\
+&= 2B^{r}(\rho ') B^{t}(\rho) \left\{ \int_{0}^{d} \cos(\sigma 'x) \cos(\rho x) \, dx + \int_{d}^{\infty} \cos(\rho x) \cdot 2 \cdot \text{Re}[De^{-i\rho 'x}] \, dx \right\} \\
+&= 2B^{r}(\rho ') B^{t}(\rho) \bigg\{ \frac{\sigma '\sin(\sigma 'x) \cos(\rho x) - \rho\cos(\sigma 'x) \sin(\rho x)}{\sigma '^{2}-\rho^{2}} \Big|_{0}^{d}  \\
+	&\hspace{132px} {} + 2 \cdot \text{Re} \bigg[  \int_{d}^{\infty} \cos(\rho x) \cdot De^{-i\rho 'x} \, dx \bigg] \bigg\} \\
+&= 2B^{r}(\rho ') B^{t}(\rho) \bigg\{ \frac{\sigma '\sin(\sigma 'd) \cos(\rho d) - \rho\cos(\sigma 'd) \sin(\rho d)}{\sigma '^{2}-\rho^{2}} \\
+	&\hspace{132px} {} + 2 \cdot \text{Re} \bigg[  D\frac{e^{-ix\rho '}(-\rho\sin(\rho x) + i\rho '\cos(\rho x))}{\rho '^{2} - \rho^{2}}  \, dx \bigg] \Big|_{d}^{\infty} \bigg\} \\
+&= 2B^{r}(\rho ') B^{t}(\rho) \bigg\{ \frac{\sigma '\sin(\sigma 'd) \cos(\rho d) - \rho\cos(\sigma 'd) \sin(\rho d)}{\sigma '^{2}-\rho^{2}} \\
+	&\hspace{132px} {} - 2 \cdot \text{Re} \bigg[  D\frac{e^{-ix\rho '}(-\rho\sin(\rho x) + i\rho '\cos(\rho x))}{\rho '^{2} - \rho^{2}} \bigg] \Big|_{0}^{d}\bigg\} \\
+&= 2B^{r}(\rho ') B^{t}(\rho) \bigg\{ \frac{\sigma '\sin(\sigma 'd) \cos(\rho d) - \rho\cos(\sigma 'd) \sin(\rho d)}{\sigma '^{2}-\rho^{2}} \\
+	&\hspace{132px} {} - 2 \cdot \text{Re} \bigg[  D\frac{e^{-i\rho 'd}(-\rho\sin(\rho d) + i\rho '\cos(\rho d)) - i\rho '}{\rho '^{2} - \rho^{2}} \bigg] \bigg\} \\
+&= 2B^{r}(\rho ') B^{t}(\rho) \bigg\{ \frac{\sigma '\sin(\sigma 'd) \cos(\rho d) - \rho\cos(\sigma 'd) \sin(\rho d)}{\sigma '^{2}-\rho^{2}} \\
+	&\hspace{132px} {} + 2 \cdot \text{Re} \bigg[  D\frac{e^{-i\rho 'd}(\rho\sin(\rho d) - i\rho '\cos(\rho d)) + i\rho '}{\rho '^{2} - \rho^{2}} \bigg] \bigg\}
+\end{align*}
+
+\subsection{Source Code}
+
+\begin{lstlisting}
+od = o1*d; pd = p2*d.transpose()
+F = 2*Br1*Bt2 * ((o1*sin(od)*cos(pd) - p2*cos(od)*sin(pd))/(o1**2-p2**2) + 2*(D1 * (exp(-1j*p1*d) * (p2*sin(pd)-1j*p1*cos(pd))) + 1j*p1 ).real / (p1**2-p2**2) )
+\end{lstlisting}
+
+
+
+
+\subsection{Fields of the Odd Modes}
+
+For odd guided modes, the fields are given by 
+
+\[\phi_{y,n}(x) = \left\{
+  \begin{array}{lr}
+    A_{n}\sin(\kappa x) & : |x| < d\\
+    \frac{x}{|x|}A_{n}\sin(\kappa d)e^{\gamma d}e^{-\gamma |x|} & : |x| \ge d
+  \end{array}
+\right.
+\]
+
+\noindent where $\phi$ stands for either $E$ or $H$, depending on the polarization. The radiation/continuum modes are
+
+\[\phi_{y}(x, \rho) = \left\{
+  \begin{array}{lr}
+    B_{n}^{r}\sin(\sigma x) & : |x| < d\\
+    \frac{x}{|x|}B_{n}^{r}\left[De^{-i\rho |x|} + D^{*}e^{-i\rho |x|}\right] & : |x| \ge d
+  \end{array}
+\right.
+\]
+
+\noindent Note that $A, B,$ and $D$ depend on the polarization. (See section \ref{sec:coefficients}).  Finally, the free-space modes in the right half-space are described by:
+
+\[\phi_{y}(x,\rho) = B^{t}\sin(\rho x)\]
+
+\subsection{$\Xi_{n}(\rho)$}
+
+\begin{align*}
+\Xi_{n}(\rho) &= \int_{-\infty}^{\infty} E_{y,n}^{r} E_{y}^{t*}(\rho) \; dx \\
+&= \int_{-d}^{d} A_{n}\sin(\kappa x) B^{t}(\rho) \sin(\rho x) \; dx \\ 
+	&\hspace{100pt} + \int_{-\infty}^{-d} -A_{n}\sin(\kappa d) e^{\gamma d} e^{-\gamma |x|} B^{t}(\rho)\sin(\rho x)\; dx \\
+	&\hspace{100pt} + \int_{d}^{\infty}     A_{n}\sin(\kappa d) e^{\gamma d} e^{-\gamma |x|} B^{t}(\rho)\sin(\rho x)\; dx \\
+&= 2 \int_{0}^{d} A_{n}\sin(\kappa x) B^{t}(\rho) \sin(\rho d) \; dx + 2 \int_{d}^{\infty}     A_{n}\sin(\kappa d) e^{\gamma d} e^{-\gamma x} B^{t}(\rho)\sin(\rho x)\; dx \\
+&= 2 A_{n} B^{t}(\rho) \left\{ \int_{0}^{d} \sin(\kappa x) \sin(\rho d) \; dx + \sin(\kappa d) e^{\gamma d} \int_{d}^{\infty}  e^{-\gamma x}\sin(\rho x)\; dx \right\}\\
+&= 2 A_{n} B^{t}(\rho) \left\{ \frac{\rho \sin(\kappa x) \cos(\rho x) - \kappa\cos(\kappa x)\sin(\rho x)}{\kappa^{2} - \rho^{2}} \bigg|_{0}^{d} \right. \\
+	&\hspace{100pt} - \left. \sin(\kappa d) e^{\gamma d} \frac{e^{-\gamma x}(\gamma \sin(\rho x) + \rho \cos(\rho x))}{\gamma^{2} + \rho^{2}} \bigg|_{d}^{\infty} \right\}\\
+&= 2 A_{n} B^{t}(\rho) \left\{ \frac{\rho \sin(\kappa d) \cos(\rho d) - \kappa\cos(\kappa d)\sin(\rho d)}{\kappa^{2} - \rho^{2}} \right. \\
+	&\hspace{100pt} + \left. \sin(\kappa d) e^{\gamma d} \frac{e^{-\gamma d}(\gamma \sin(\rho d) + \rho \cos(\rho d))}{\gamma^{2} + \rho^{2}} \right\}\\
+&= 2 A_{n} B^{t}(\rho) \left\{ \frac{\rho \sin(\kappa d) \cos(\rho d) - \kappa\cos(\kappa d)\sin(\rho d)}{\kappa^{2} - \rho^{2}} + \frac{\sin(\kappa d)(\gamma \sin(\rho d) + \rho \cos(\rho d))}{\gamma^{2} + \rho^{2}} \right\}\\
+&= 2 A_{n} B^{t}(\rho) \sin(\kappa d)\left\{ \frac{\rho \cos(\rho d) - \kappa\cot(\kappa d)\sin(\rho d)}{\kappa^{2} - \rho^{2}} + \frac{\gamma \sin(\rho d) + \rho \cos(\rho d)}{\gamma^{2} + \rho^{2}} \right\}\\
+%&= 2 A_{n} B^{t} \sin(\kappa d)\left\{ \frac{\rho \cos(\rho d) + \kappa\frac{\kappa}{\gamma}\sin(\rho d)}{\kappa^{2} - \rho^{2}} + \frac{\gamma \sin(\rho d) + \rho \cos(\rho d)}{\gamma^{2} + \rho^{2}} \right\}\\
+\end{align*}
+
+\subsection{Source Code}
+
+\begin{lstlisting}
+xi[i,:,:] = 2* Am[i] * Bt * sin(Km[i]*d) * ((p*cos(p*d) - Km[i]*cot(Km[i]*d)*sin(p*d))/(Km[i]**2-p**2) + (gm[i]*sin(p*d) + p*cos(p*d))/(gm[i]**2 + p**2))
+\end{lstlisting}
+
+\subsection{$\Phi_{n}(\rho ',\rho)$}
+
+\begin{align*}
+\Phi_{n}(\rho ', \rho) &= \int_{-\infty}^{\infty} E_{y}^{r}(\rho ') E_{y}^{t*}(\rho) \; dx \\
+&= \int_{-d}^{d} B^{r}_{y}(\rho ')\sin(\sigma x) B^{t}(\rho) \sin(\rho x) \; dx \\ 
+	&\hspace{100pt} + \int_{-\infty}^{-d} -B^{r}_{y}(\rho ')[De^{-i\rho ' |x|} + D^{*}e^{i\rho '|x|}] B^{t}(\rho)\sin(\rho x)\; dx \\
+	&\hspace{100pt} + \int_{d}^{\infty}     B^{r}_{y}(\rho ')[De^{-i\rho ' |x|} + D^{*}e^{i\rho '|x|}] B^{t}(\rho)\sin(\rho x)\; dx \\
+&= 2 B^{r}_{y}(\rho ') B^{t}(\rho) \left\{\int_{0}^{d} \sin(\sigma x) \sin(\rho x) \; dx + \int_{d}^{\infty} [De^{-i\rho ' |x|} + D^{*}e^{i\rho '|x|}] \sin(\rho x)\; dx \right\} \\
+&= 2 B^{r}_{y}(\rho ') B^{t}(\rho) \left\{ \frac{\rho\sin(\sigma x)\cos(\rho x) - \sigma \cos(\sigma x) \sin(\rho x)}{\sigma^{2} - \rho^{2}} \bigg|_{0}^{d} + 2\text{Re} \bigg[ \int_{d}^{\infty} De^{-i\rho ' x} \sin(\rho x)\; dx \bigg] \right\} \\
+&= 2 B^{r}_{y}(\rho ') B^{t}(\rho) \left\{ \frac{\rho\sin(\sigma d)\cos(\rho d) - \sigma \cos(\sigma d) \sin(\rho d)}{\sigma^{2} - \rho^{2}} + 2\text{Re} \bigg[ D\frac{e^{-i\rho ' x}(\rho \cos(\rho x) + i\rho ' \sin(\rho x))}{\rho'^{2} - \rho^{2}} \bigg|_{d}^{\infty} \bigg] \right\} \\
+&= 2 B^{r}_{y}(\rho ') B^{t}(\rho) \left\{ \frac{\rho\sin(\sigma d)\cos(\rho d) - \sigma \cos(\sigma d) \sin(\rho d)}{\sigma^{2} - \rho^{2}} - 2\text{Re} \bigg[ D\frac{e^{-i\rho ' x}(\rho \cos(\rho x) + i\rho ' \sin(\rho x))}{\rho'^{2} - \rho^{2}} \bigg|_{0}^{d} \bigg] \right\} \\
+&= 2 B^{r}_{y}(\rho ') B^{t}(\rho) \left\{ \frac{\rho\sin(\sigma d)\cos(\rho d) - \sigma \cos(\sigma d) \sin(\rho d)}{\sigma^{2} - \rho^{2}} - 2\text{Re} \bigg[ D\frac{e^{-i\rho ' d}(\rho \cos(\rho d) + i\rho ' \sin(\rho d)) - \rho}{\rho'^{2} - \rho^{2}} \bigg] \right\} \\
+\end{align*}
+
+\section{Hamid's Derivations}
+
+\subsection{Derivation of $A$:}
+
+Let's start with the form of $\psi$ in chapter 6.1 of your notes:
+
+\begin{align*}
+\psi= & \frac{2\kappa_{n}d+sin\left(2\kappa_{n}d\right)}{4\epsilon_{r}\kappa_{n}}+\frac{cos^{2}\left(\kappa_{n}d\right)}{2\gamma_{n}}
+\end{align*}
+
+
+We know that: 
+
+\begin{align*}
+tan\left(\kappa_{n}d\right)= & \frac{\epsilon_{r}\gamma_{n}}{\kappa_{n}}
+\end{align*}
+
+
+Therefore:
+
+\begin{align*}
+cos^{2}\left(\kappa_{n}d\right)= & \left(1+\frac{\epsilon_{r}^{2}\gamma_{n}^{2}}{\kappa_{n}^{2}}\right)^{-1}
+\end{align*}
+
+
+\begin{align*}
+sin\left(2\kappa_{n}d\right)= & \frac{2\epsilon_{r}\gamma_{n}}{\kappa_{n}}\left(1+\frac{\epsilon_{r}^{2}\gamma_{n}^{2}}{\kappa_{n}^{2}}\right)^{-1}
+\end{align*}
+
+
+So that: 
+
+\begin{align*}
+\psi= & \frac{d}{2\epsilon_{r}}+\frac{sin\left(2\kappa_{n}d\right)}{4\epsilon_{r}\kappa_{n}}+\frac{cos^{2}\left(\kappa_{n}d\right)}{2\gamma_{n}}\\
+= & \frac{d}{2\epsilon_{r}}+\frac{1}{2\kappa_{n}}\frac{\gamma_{n}}{\kappa_{n}}\left(1+\frac{\epsilon_{r}^{2}\gamma_{n}^{2}}{\kappa_{n}^{2}}\right)^{-1}+\frac{1}{2\gamma_{n}}\left(1+\frac{\epsilon_{r}^{2}\gamma_{n}^{2}}{\kappa_{n}^{2}}\right)^{-1}\\
+= & \frac{d}{2\epsilon_{r}}+\left(1+\frac{\epsilon_{r}^{2}\gamma_{n}^{2}}{\kappa_{n}^{2}}\right)^{-1}\left(\frac{\gamma_{n}}{2\kappa_{n}^{2}}+\frac{1}{2\gamma_{n}}\right)\\
+= & \frac{d}{2\epsilon_{r}}+\frac{1}{2\gamma_{n}}\left(\kappa_{n}^{2}+\epsilon_{r}^{2}\gamma_{n}^{2}\right)^{-1}\left(\gamma_{n}^{2}+\kappa_{n}^{2}\right)
+\end{align*}
+
+
+We have:
+
+\begin{align*}
+\kappa_{n}^{2}+\epsilon_{r}^{2}\gamma_{n}^{2}= & \left(\epsilon_{r}^{2}-1\right)\beta_{n}^{2}+\epsilon_{r}\left(1-\epsilon_{r}\right)k_{0}^{2}\\
+= & \left(\epsilon_{r}-1\right)\left(\left(\epsilon_{r}+1\right)\beta_{n}^{2}-\epsilon_{r}k_{0}^{2}\right)\\
+= & \left(\epsilon_{r}-1\right)\left(\epsilon_{r}\gamma_{n}^{2}+\beta_{n}^{2}\right)
+\end{align*}
+
+
+\begin{align*}
+\kappa_{n}^{2}+\gamma_{n}^{2}= & \left(\epsilon_{r}-1\right)k_{0}^{2}
+\end{align*}
+
+
+Therefore: 
+
+\begin{align*}
+A= & \sqrt{\frac{\omega\epsilon_{0}P}{\beta_{n}\psi}}\\
+= & \sqrt{\frac{\omega\epsilon_{0}P}{\beta_{n}\left(\frac{d}{2\epsilon_{r}}+\left(\kappa_{n}^{2}+\epsilon_{r}^{2}\gamma_{n}^{2}\right)^{-1}\frac{1}{2\gamma_{n}}\left(\gamma_{n}^{2}+\kappa_{n}^{2}\right)\right)}}\\
+= & \sqrt{\frac{2\omega\epsilon_{0}\epsilon_{r}P}{\beta_{n}\left(d+\frac{\epsilon_{r}}{\gamma_{n}}\left(\kappa_{n}^{2}+\epsilon_{r}^{2}\gamma_{n}^{2}\right)^{-1}\left(\gamma_{n}^{2}+\kappa_{n}^{2}\right)\right)}}\\
+= & \sqrt{\frac{2\omega\epsilon_{r}\epsilon_{0}P}{\beta_{n}\left(d+\frac{\epsilon_{r}}{\gamma_{n}}\left(\epsilon_{r}\gamma_{n}^{2}+\beta_{n}^{2}\right)^{-1}k_{0}^{2}\right)}}\\
+= & \sqrt{\frac{2\omega\epsilon_{r}\epsilon_{0}P\gamma_{n}}{\beta_{n}\left(d\gamma_{n}+\epsilon_{r}\left(\epsilon_{r}\gamma_{n}^{2}+\beta_{n}^{2}\right)^{-1}k_{0}^{2}\right)}}\\
+= & \sqrt{\frac{2\omega\epsilon_{0}\epsilon_{r}P\gamma_{n}\left(\epsilon_{r}\gamma_{n}^{2}+\beta_{n}^{2}\right)}{\beta_{n}\left(\epsilon_{r}k_{0}^{2}+d\gamma_{n}\left(\epsilon_{r}\gamma_{n}^{2}+\beta_{n}^{2}\right)\right)}}
+\end{align*}
+
+
+This shows that the form of A in chapter 6.1 of your notes is consistent
+with the equation 8.3-40 of the book and also equation A-4 of the
+appendix of the main article.
+
+
+\subsection{Derivation of $F\left(\rho,\rho^{\prime}\right)$:}
+
+\begin{align*}
+F\left(\rho,\rho^{\prime}\right)= & 2\int_{0}^{d}B^{r}\left(\rho^{\prime}\right)cos\left(\sigma^{\prime}x\right)B^{t}\left(\rho\right)cos\left(\rho x\right)dx\\
++ & 2\int_{d}^{\infty}B^{r}\left(\rho^{\prime}\right)\left[D\left(\rho^{\prime}\right)e^{-i\rho^{\prime}x}+D^{*}\left(\rho^{\prime}\right)e^{i\rho^{\prime}x}\right]B^{t}\left(\rho\right)cos\left(\rho x\right)dx\\
+= & 2B^{r}\left(\rho^{\prime}\right)B^{t}\left(\rho\right)\int_{0}^{d}cos\left(\sigma^{\prime}x\right)cos\left(\rho x\right)dx\\
++ & 2B^{r}\left(\rho^{\prime}\right)B^{t}\left(\rho\right)\int_{d}^{\infty}\left[D\left(\rho^{\prime}\right)e^{-i\rho^{\prime}x}+D^{*}\left(\rho^{\prime}\right)e^{i\rho^{\prime}x}\right]cos\left(\rho x\right)dx\\
+= & B^{r}\left(\rho^{\prime}\right)B^{t}\left(\rho\right)\int_{0}^{d}\left(cos\left(\left(\sigma^{\prime}+\rho\right)x\right)+cos\left(\left(\sigma^{\prime}-\rho\right)x\right)\right)dx\\
++ & 2B^{r}\left(\rho^{\prime}\right)B^{t}\left(\rho\right)\int_{d}^{\infty}\left[D\left(\rho^{\prime}\right)e^{-i\rho^{\prime}x}+D^{*}\left(\rho^{\prime}\right)e^{i\rho^{\prime}x}\right]cos\left(\rho x\right)dx\\
+= & B^{r}\left(\rho^{\prime}\right)B^{t}\left(\rho\right)\left\{ \frac{sin\left(\left(\sigma^{\prime}+\rho\right)d\right)}{\sigma^{\prime}+\rho}+\frac{sin\left(\left(\sigma^{\prime}-\rho\right)d\right)}{\sigma^{\prime}-\rho}\right\} \\
++ & 2B^{r}\left(\rho^{\prime}\right)B^{t}\left(\rho\right)\int_{d}^{\infty}\left[D\left(\rho^{\prime}\right)e^{-i\rho^{\prime}x}+D^{*}\left(\rho^{\prime}\right)e^{i\rho^{\prime}x}\right]cos\left(\rho x\right)dx
+\end{align*}
+
+
+But we know that: 
+
+\begin{align*}
+D\left(\rho\right)= & \frac{1}{2}\left[cos\left(\sigma d\right)-\frac{i\sigma}{\epsilon_{r}\rho}sin\left(\sigma d\right)\right]e^{i\rho d}
+\end{align*}
+
+
+So that: 
+
+\begin{align*}
+ & 2\int_{d}^{\infty}\left[D\left(\rho^{\prime}\right)e^{-i\rho^{\prime}x}+D^{*}\left(\rho^{\prime}\right)e^{i\rho^{\prime}x}\right]cos\left(\rho x\right)dx\\
+ & =\int_{d}^{\infty}\left[cos\left(\sigma^{\prime}d\right)-\frac{i\sigma^{\prime}}{\epsilon_{r}\rho^{\prime}}sin\left(\sigma^{\prime}d\right)\right]e^{i\rho^{\prime}d}e^{-i\rho^{\prime}x}cos\left(\rho x\right)dx\\
+ & +\int_{d}^{\infty}\left[cos\left(\sigma^{\prime}d\right)+\frac{i\sigma^{\prime}}{\epsilon_{r}\rho^{\prime}}sin\left(\sigma^{\prime}d\right)\right]e^{-i\rho^{\prime}d}e^{i\rho^{\prime}x}cos\left(\rho x\right)dx\\
+ & =\left[cos\left(\sigma^{\prime}d\right)-\frac{i\sigma^{\prime}}{\epsilon_{r}\rho^{\prime}}sin\left(\sigma^{\prime}d\right)\right]e^{i\rho^{\prime}d}\int_{d}^{\infty}e^{-i\rho^{\prime}x}cos\left(\rho x\right)dx\\
+ & +\left[cos\left(\sigma^{\prime}d\right)+\frac{i\sigma^{\prime}}{\epsilon_{r}\rho^{\prime}}sin\left(\sigma^{\prime}d\right)\right]e^{-i\rho^{\prime}d}\int_{d}^{\infty}e^{i\rho^{\prime}x}cos\left(\rho x\right)dx
+\end{align*}
+
+
+But: 
+
+\begin{align*}
+ & \int_{d}^{\infty}e^{-i\rho^{\prime}x}cos\left(\rho x\right)dx\\
+ & =\frac{1}{2}\int_{d}^{\infty}e^{-i\left(\rho^{\prime}+\rho\right)x}dx+\frac{1}{2}\int_{d}^{\infty}e^{-i\left(\rho^{\prime}-\rho\right)x}dx\\
+ & =\frac{1}{2}\int_{0}^{\infty}e^{-i\left(\rho^{\prime}+\rho\right)x}dx+\frac{1}{2}\int_{0}^{\infty}e^{-i\left(\rho^{\prime}-\rho\right)x}dx\\
+ & -\frac{1}{2}\int_{0}^{d}e^{-i\left(\rho^{\prime}+\rho\right)x}dx-\frac{1}{2}\int_{0}^{d}e^{-i\left(\rho^{\prime}-\rho\right)x}dx\\
+ & =\frac{\pi}{2}\delta\left(\rho+\rho^{\prime}\right)+\frac{\pi}{2}\delta\left(\rho-\rho^{\prime}\right)+\frac{1}{2i\left(\rho+\rho^{\prime}\right)}+\frac{1}{2i\left(\rho^{\prime}-\rho\right)}\\
+ & +\frac{e^{-i\left(\rho^{\prime}+\rho\right)d}-1}{2i\left(\rho^{\prime}+\rho\right)}+\frac{e^{-i\left(\rho^{\prime}-\rho\right)d}-1}{2i\left(\rho^{\prime}-\rho\right)}\\
+ & =\frac{\pi}{2}\delta\left(\rho+\rho^{\prime}\right)+\frac{\pi}{2}\delta\left(\rho-\rho^{\prime}\right)+\frac{e^{-i\left(\rho^{\prime}+\rho\right)d}}{2i\left(\rho^{\prime}+\rho\right)}+\frac{e^{-i\left(\rho^{\prime}-\rho\right)d}}{2i\left(\rho^{\prime}-\rho\right)}
+\end{align*}
+
+
+Similarly:
+
+\begin{align*}
+\int_{d}^{\infty}e^{i\rho^{\prime}x}cos\left(\rho x\right)dx & =\frac{\pi}{2}\delta\left(\rho-\rho^{\prime}\right)+\frac{\pi}{2}\delta\left(\rho+\rho^{\prime}\right)-\frac{e^{i\left(\rho^{\prime}+\rho\right)d}}{2i\left(\rho^{\prime}+\rho\right)}-\frac{e^{i\left(\rho^{\prime}-\rho\right)d}}{2i\left(\rho^{\prime}-\rho\right)}
+\end{align*}
+
+
+Therefore: 
+
+\begin{align*}
+ & 2\int_{d}^{\infty}\left[D\left(\rho^{\prime}\right)e^{-i\rho^{\prime}x}+D^{*}\left(\rho^{\prime}\right)e^{i\rho^{\prime}x}\right]cos\left(\rho x\right)dx\\
+ & =\left[cos\left(\sigma^{\prime}d\right)-\frac{i\sigma^{\prime}}{\epsilon_{r}\rho^{\prime}}sin\left(\sigma^{\prime}d\right)\right]e^{i\rho^{\prime}d}\int_{d}^{\infty}e^{-i\rho^{\prime}x}cos\left(\rho x\right)dx\\
+ & +\left[cos\left(\sigma^{\prime}d\right)+\frac{i\sigma^{\prime}}{\epsilon_{r}\rho^{\prime}}sin\left(\sigma^{\prime}d\right)\right]e^{-i\rho^{\prime}d}\int_{d}^{\infty}e^{i\rho^{\prime}x}cos\left(\rho x\right)dx\\
+ & =\frac{1}{2}\left[cos\left(\sigma^{\prime}d\right)-\frac{i\sigma^{\prime}}{\epsilon_{r}\rho^{\prime}}sin\left(\sigma^{\prime}d\right)\right]e^{i\rho^{\prime}d}\left[\pi\delta\left(\rho-\rho^{\prime}\right)+\frac{e^{-i\left(\rho^{\prime}+\rho\right)d}}{i\left(\rho^{\prime}+\rho\right)}+\frac{e^{-i\left(\rho^{\prime}-\rho\right)d}}{i\left(\rho^{\prime}-\rho\right)}\right]\\
+ & +\frac{1}{2}\left[cos\left(\sigma^{\prime}d\right)+\frac{i\sigma^{\prime}}{\epsilon_{r}\rho^{\prime}}sin\left(\sigma^{\prime}d\right)\right]e^{-i\rho^{\prime}d}\left[\pi\delta\left(\rho-\rho^{\prime}\right)-\frac{e^{i\left(\rho^{\prime}+\rho\right)d}}{i\left(\rho^{\prime}+\rho\right)}-\frac{e^{i\left(\rho^{\prime}-\rho\right)d}}{i\left(\rho^{\prime}-\rho\right)}\right]\\
+ & =\frac{1}{2}\left[cos\left(\sigma^{\prime}d\right)-\frac{i\sigma^{\prime}}{\epsilon_{r}\rho^{\prime}}sin\left(\sigma^{\prime}d\right)\right]\left[\pi e^{i\rho^{\prime}d}\delta\left(\rho-\rho^{\prime}\right)+\frac{e^{-i\rho d}}{i\left(\rho^{\prime}+\rho\right)}+\frac{e^{i\rho d}}{i\left(\rho^{\prime}-\rho\right)}\right]\\
+ & +\frac{1}{2}\left[cos\left(\sigma^{\prime}d\right)+\frac{i\sigma^{\prime}}{\epsilon_{r}\rho^{\prime}}sin\left(\sigma^{\prime}d\right)\right]\left[\pi e^{-i\rho^{\prime}d}\delta\left(\rho-\rho^{\prime}\right)-\frac{e^{i\rho d}}{i\left(\rho^{\prime}+\rho\right)}-\frac{e^{-i\rho d}}{i\left(\rho^{\prime}-\rho\right)}\right]\\
+ & =2\Re\left(D\left(\rho^{\prime}\right)\right)\pi\delta\left(\rho-\rho^{\prime}\right)\\
+ & +\frac{1}{2i\left(\rho^{\prime}-\rho\right)}\left(cos\left(\sigma^{\prime}d\right)-\frac{i\sigma^{\prime}}{\epsilon_{r}\rho^{\prime}}sin\left(\sigma^{\prime}d\right)\right)e^{i\rho d}\\
+ & -\frac{1}{2i\left(\rho^{\prime}-\rho\right)}\left(cos\left(\sigma^{\prime}d\right)+\frac{i\sigma^{\prime}}{\epsilon_{r}\rho^{\prime}}sin\left(\sigma^{\prime}d\right)\right)e^{-i\rho d}\\
+ & +\frac{1}{2i\left(\rho^{\prime}+\rho\right)}\left(cos\left(\sigma^{\prime}d\right)-\frac{i\sigma^{\prime}}{\epsilon_{r}\rho^{\prime}}sin\left(\sigma^{\prime}d\right)\right)e^{-i\rho d}\\
+ & -\frac{1}{2i\left(\rho^{\prime}+\rho\right)}\left(cos\left(\sigma^{\prime}d\right)+\frac{i\sigma^{\prime}}{\epsilon_{r}\rho^{\prime}}sin\left(\sigma^{\prime}d\right)\right)e^{i\rho d}\\
+ & =2\Re\left(D\left(\rho^{\prime}\right)\right)\pi\delta\left(\rho-\rho^{\prime}\right)\\
+ & +\frac{1}{2i\left(\rho^{\prime}-\rho\right)}\left[cos\left(\sigma^{\prime}d\right)\left(e^{i\rho d}-e^{-i\rho d}\right)-\frac{i\sigma^{\prime}}{\epsilon_{r}\rho^{\prime}}sin\left(\sigma^{\prime}d\right)\left(e^{i\rho d}+e^{-i\rho d}\right)\right]\\
+ & +\frac{1}{2i\left(\rho^{\prime}+\rho\right)}\left[cos\left(\sigma^{\prime}d\right)\left(e^{-i\rho d}-e^{i\rho d}\right)-\frac{i\sigma^{\prime}}{\epsilon_{r}\rho^{\prime}}sin\left(\sigma^{\prime}d\right)\left(e^{-i\rho d}+e^{i\rho d}\right)\right]\\
+ & =2\Re\left(D\left(\rho^{\prime}\right)\right)\pi\delta\left(\rho-\rho^{\prime}\right)\\
+ & +\frac{1}{\left(\rho^{\prime}-\rho\right)}\left[cos\left(\sigma^{\prime}d\right)sin\left(\rho d\right)-\frac{\sigma^{\prime}}{\epsilon_{r}\rho^{\prime}}sin\left(\sigma^{\prime}d\right)cos\left(\rho d\right)\right]\\
+ & +\frac{1}{\left(\rho^{\prime}+\rho\right)}\left[-cos\left(\sigma^{\prime}d\right)sin\left(\rho d\right)-\frac{\sigma^{\prime}}{\epsilon_{r}\rho^{\prime}}sin\left(\sigma^{\prime}d\right)cos\left(\rho d\right)\right]\\
+ & =2\Re\left(D\left(\rho^{\prime}\right)\right)\pi\delta\left(\rho-\rho^{\prime}\right)\\
+ & +\left[\frac{1}{\left(\rho^{\prime}-\rho\right)}-\frac{1}{\left(\rho^{\prime}+\rho\right)}\right]cos\left(\sigma^{\prime}d\right)sin\left(\rho d\right)\\
+ & -\left[\frac{1}{\left(\rho^{\prime}-\rho\right)}+\frac{1}{\left(\rho^{\prime}+\rho\right)}\right]\frac{\sigma^{\prime}}{\epsilon_{r}\rho^{\prime}}sin\left(\sigma^{\prime}d\right)cos\left(\rho d\right)\\
+ & =2\Re\left(D\left(\rho^{\prime}\right)\right)\pi\delta\left(\rho-\rho^{\prime}\right)\\
+ & +\frac{2\rho}{\left(\rho^{\prime2}-\rho^{2}\right)}cos\left(\sigma^{\prime}d\right)sin\left(\rho d\right)\\
+ & -\frac{2\sigma^{\prime}}{\left(\rho^{\prime2}-\rho^{2}\right)\epsilon_{r}}sin\left(\sigma^{\prime}d\right)cos\left(\rho d\right)
+\end{align*}
+
+
+Therefore:
+
+\begin{align*}
+F\left(\rho,\rho^{\prime}\right)= & B^{r}\left(\rho^{\prime}\right)B^{t}\left(\rho\right)\left\{ 2\pi\Re\left(D\left(\rho^{\prime}\right)\right)\delta\left(\rho-\rho^{\prime}\right)+\frac{sin\left(\left(\sigma^{\prime}+\rho\right)d\right)}{\sigma^{\prime}+\rho}+\frac{sin\left(\left(\sigma^{\prime}-\rho\right)d\right)}{\sigma^{\prime}-\rho}\right\} \\
++ & B^{r}\left(\rho^{\prime}\right)B^{t}\left(\rho\right)\left\{ \frac{2\rho}{\left(\rho^{\prime2}-\rho^{2}\right)}cos\left(\sigma^{\prime}d\right)sin\left(\rho d\right)-\frac{2\sigma^{\prime}}{\left(\rho^{\prime2}-\rho^{2}\right)\epsilon_{r}}sin\left(\sigma^{\prime}d\right)cos\left(\rho d\right)\right\} \\
+= & B^{r}\left(\rho^{\prime}\right)B^{t}\left(\rho\right)\left\{ 2\pi\Re\left(D\left(\rho^{\prime}\right)\right)\delta\left(\rho-\rho^{\prime}\right)+\frac{sin\left(\left(\sigma^{\prime}+\rho\right)d\right)}{\sigma^{\prime}+\rho}+\frac{sin\left(\left(\sigma^{\prime}-\rho\right)d\right)}{\sigma^{\prime}-\rho}\right\} \\
++ & B^{r}\left(\rho^{\prime}\right)B^{t}\left(\rho\right)\frac{\rho}{\left(\rho^{\prime2}-\rho^{2}\right)}\left(sin\left(\left(\rho+\sigma^{\prime}\right)d\right)+sin\left(\left(\rho-\sigma^{\prime}\right)d\right)\right)\\
+- & B^{r}\left(\rho^{\prime}\right)B^{t}\left(\rho\right)\frac{\sigma^{\prime}}{\left(\rho^{\prime2}-\rho^{2}\right)\epsilon_{r}}\left(sin\left(\left(\rho+\sigma^{\prime}\right)d\right)-sin\left(\left(\rho-\sigma^{\prime}\right)d\right)\right)\\
+= & B^{r}\left(\rho^{\prime}\right)B^{t}\left(\rho\right)\left\{ 2\pi\Re\left(D\left(\rho^{\prime}\right)\right)\delta\left(\rho-\rho^{\prime}\right)+\frac{sin\left(\left(\sigma^{\prime}+\rho\right)d\right)}{\sigma^{\prime}+\rho}+\frac{sin\left(\left(\sigma^{\prime}-\rho\right)d\right)}{\sigma^{\prime}-\rho}\right\} \\
++ & B^{r}\left(\rho^{\prime}\right)B^{t}\left(\rho\right)\frac{1}{\left(\rho^{\prime2}-\rho^{2}\right)}\left(\rho-\frac{\sigma^{\prime}}{\epsilon_{r}}\right)sin\left(\left(\rho+\sigma^{\prime}\right)d\right)\\
++ & B^{r}\left(\rho^{\prime}\right)B^{t}\left(\rho\right)\frac{1}{\left(\rho^{\prime2}-\rho^{2}\right)}\left(\rho+\frac{\sigma^{\prime}}{\epsilon_{r}}\right)sin\left(\left(\rho-\sigma^{\prime}\right)d\right)\\
+= & B^{r}\left(\rho^{\prime}\right)B^{t}\left(\rho\right)2\pi\Re\left(D\left(\rho^{\prime}\right)\right)\delta\left(\rho-\rho^{\prime}\right)\\
++ & B^{r}\left(\rho^{\prime}\right)B^{t}\left(\rho\right)sin\left(\left(\sigma^{\prime}+\rho\right)d\right)\left(\frac{1}{\sigma^{\prime}+\rho}+\frac{\rho-\frac{\sigma^{\prime}}{\epsilon_{r}}}{\rho^{\prime2}-\rho^{2}}\right)\\
++ & B^{r}\left(\rho^{\prime}\right)B^{t}\left(\rho\right)sin\left(\left(\sigma^{\prime}-\rho\right)d\right)\left(\frac{1}{\sigma^{\prime}-\rho}-\frac{\rho+\frac{\sigma^{\prime}}{\epsilon_{r}}}{\rho^{\prime2}-\rho^{2}}\right)
+\end{align*}
+
+
+But We know:
+
+\begin{align*}
+\frac{1}{\sigma^{\prime}+\rho}+\frac{\rho-\frac{\sigma^{\prime}}{\epsilon_{r}}}{\rho^{\prime2}-\rho^{2}} & =\frac{1}{\left(\sigma^{\prime}+\rho\right)\left(\rho^{\prime2}-\rho^{2}\right)}\left(\rho^{\prime2}-\rho^{2}+\left(\rho+\sigma^{\prime}\right)\left(\rho-\frac{\sigma^{\prime}}{\epsilon_{r}}\right)\right)
+\end{align*}
+
+
+\begin{align*}
+\frac{1}{\sigma^{\prime}-\rho}-\frac{\rho+\frac{\sigma^{\prime}}{\epsilon_{r}}}{\rho^{\prime2}-\rho^{2}} & =\frac{1}{\left(\sigma^{\prime}-\rho\right)\left(\rho^{\prime2}-\rho^{2}\right)}\left(\rho^{\prime2}-\rho^{2}-\left(\sigma^{\prime}-\rho\right)\left(\rho+\frac{\sigma^{\prime}}{\epsilon_{r}}\right)\right)
+\end{align*}
+
+
+\begin{align*}
+\rho^{\prime2}-\rho^{2}+\left(\rho+\sigma^{\prime}\right)\left(\rho-\frac{\sigma^{\prime}}{\epsilon_{r}}\right) & =\rho^{\prime2}-\rho^{2}+\left(\rho+\sigma^{\prime}\right)\rho-\left(\rho+\sigma^{\prime}\right)\frac{\sigma^{\prime}}{\epsilon_{r}}\\
+ & =\rho^{\prime2}-\rho^{2}+\left(\rho^{2}+\sigma^{\prime}\rho\right)-\left(\frac{\rho\sigma^{\prime}}{\epsilon_{r}}+\frac{\sigma^{\prime2}}{\epsilon_{r}}\right)\\
+ & =\rho^{\prime2}+\sigma^{\prime}\rho\left(1-\frac{1}{\epsilon_{r}}\right)-\frac{\sigma^{\prime2}}{\epsilon_{r}}\\
+ & =k_{0}^{2}\left(1-\epsilon_{r}\right)+\sigma^{\prime}\left(\sigma^{\prime}+\rho\right)\left(1-\frac{1}{\epsilon_{r}}\right)
+\end{align*}
+
+
+\begin{align*}
+\rho^{\prime2}-\rho^{2}+\left(\rho-\sigma^{\prime}\right)\left(\rho+\frac{\sigma^{\prime}}{\epsilon_{r}}\right) & =\rho^{\prime2}-\rho^{2}+\left(\rho-\sigma^{\prime}\right)\rho+\left(\rho-\sigma^{\prime}\right)\frac{\sigma^{\prime}}{\epsilon_{r}}\\
+ & =\rho^{\prime2}-\rho^{2}+\left(\rho^{2}-\sigma^{\prime}\rho\right)+\left(\frac{\rho\sigma^{\prime}}{\epsilon_{r}}-\frac{\sigma^{\prime2}}{\epsilon_{r}}\right)\\
+ & =\rho^{\prime2}-\sigma^{\prime}\rho\left(1-\frac{1}{\epsilon_{r}}\right)-\frac{\sigma^{\prime2}}{\epsilon_{r}}\\
+ & =k_{0}^{2}\left(1-\epsilon_{r}\right)+\sigma^{\prime}\left(\sigma^{\prime}-\rho\right)\left(1-\frac{1}{\epsilon_{r}}\right)
+\end{align*}
+
+
+Since: 
+
+\begin{align*}
+\rho^{\prime2} & =k_{0}^{2}\left(1-\epsilon_{r}\right)+\sigma^{\prime2}
+\end{align*}
+
+
+Therefore:
+
+\begin{align*}
+F\left(\rho,\rho^{\prime}\right)= & B^{r}\left(\rho^{\prime}\right)B^{t}\left(\rho\right)2\pi\Re\left(D\left(\rho^{\prime}\right)\right)\delta\left(\rho-\rho^{\prime}\right)\\
++ & B^{r}\left(\rho^{\prime}\right)B^{t}\left(\rho\right)\frac{sin\left(\left(\sigma^{\prime}+\rho\right)d\right)}{\left(\sigma^{\prime}+\rho\right)\left(\rho^{\prime2}-\rho^{2}\right)}\left(k_{0}^{2}\left(1-\epsilon_{r}\right)+\sigma^{\prime}\left(\sigma^{\prime}+\rho\right)\left(1-\frac{1}{\epsilon_{r}}\right)\right)\\
++ & B^{r}\left(\rho^{\prime}\right)B^{t}\left(\rho\right)\frac{sin\left(\left(\sigma^{\prime}-\rho\right)d\right)}{\left(\sigma^{\prime}-\rho\right)\left(\rho^{\prime2}-\rho^{2}\right)}\left(k_{0}^{2}\left(1-\epsilon_{r}\right)+\sigma^{\prime}\left(\sigma^{\prime}-\rho\right)\left(1-\frac{1}{\epsilon_{r}}\right)\right)\\
+= & B^{r}\left(\rho^{\prime}\right)B^{t}\left(\rho\right)2\pi\Re\left(D\left(\rho^{\prime}\right)\right)\delta\left(\rho-\rho^{\prime}\right)\\
++ & B^{r}\left(\rho^{\prime}\right)B^{t}\left(\rho\right)\left\{ \frac{sin\left(\left(\sigma^{\prime}+\rho\right)d\right)}{\left(\sigma^{\prime}+\rho\right)}\frac{k_{0}^{2}\left(1-\epsilon_{r}\right)}{\left(\rho^{\prime2}-\rho^{2}\right)}+\frac{sin\left(\left(\sigma^{\prime}+\rho\right)d\right)}{\left(\rho^{\prime2}-\rho^{2}\right)}\sigma^{\prime}\left(1-\frac{1}{\epsilon_{r}}\right)\right\} \\
++ & B^{r}\left(\rho^{\prime}\right)B^{t}\left(\rho\right)\left\{ \frac{sin\left(\left(\sigma^{\prime}-\rho\right)d\right)}{\left(\sigma^{\prime}-\rho\right)}\frac{k_{0}^{2}\left(1-\epsilon_{r}\right)}{\left(\rho^{\prime2}-\rho^{2}\right)}+\frac{sin\left(\left(\sigma^{\prime}-\rho\right)d\right)}{\left(\rho^{\prime2}-\rho^{2}\right)}\sigma^{\prime}\left(1-\frac{1}{\epsilon_{r}}\right)\right\} \\
+= & B^{r}\left(\rho^{\prime}\right)B^{t}\left(\rho\right)2\pi\Re\left(D\left(\rho^{\prime}\right)\right)\delta\left(\rho-\rho^{\prime}\right)\\
+- & B^{r}\left(\rho^{\prime}\right)B^{t}\left(\rho\right)\left(\frac{sin\left(\left(\sigma^{\prime}+\rho\right)d\right)}{\left(\sigma^{\prime}+\rho\right)}+\frac{sin\left(\left(\sigma^{\prime}-\rho\right)d\right)}{\left(\sigma^{\prime}-\rho\right)}\right)\frac{k_{0}^{2}\left(\epsilon_{r}-1\right)}{\left(\rho^{\prime2}-\rho^{2}\right)}\\
++ & 2B^{r}\left(\rho^{\prime}\right)B^{t}\left(\rho\right)\sigma^{\prime}\left(\epsilon_{r}-1\right)\frac{sin\left(\sigma^{\prime}d\right)cos\left(\rho d\right)}{\left(\rho^{\prime2}-\rho^{2}\right)\epsilon_{r}}
+\end{align*}
+
+
+\subsection{Integration Identity to remove singularities}
+
+Let's consider the following integral to evaluate:
+
+\begin{align*}
+\int_{0}^{\infty}\frac{H(\rho,\rho^{\prime})}{\rho^{\prime2}-\rho^{2}}d\rho^{\prime}= & \int_{0}^{\infty}\frac{H(\rho,\rho^{\prime})-H(\rho,\rho)}{\rho^{\prime2}-\rho^{2}}d\rho^{\prime}\\
++ & H(\rho,\rho)\int_{0}^{\infty}\frac{1}{\rho^{\prime2}-\rho^{2}}d\rho^{\prime}\\
+= & \int_{0}^{\infty}\frac{H(\rho,\rho^{\prime})-H(\rho,\rho)}{\rho^{\prime2}-\rho^{2}}d\rho^{\prime}\\
++ & H(\rho,\rho)\int_{0}^{\infty}\frac{1}{\rho^{\prime2}-\rho^{2}}d\rho^{\prime}\\
+= & \int_{0}^{\infty}\frac{H(\rho,\rho^{\prime})-H(\rho,\rho)}{\rho^{\prime2}-\rho^{2}}d\rho^{\prime}\\
++ & H(\rho,\rho)\int_{-\rho}^{\infty}\frac{dx}{x\left(x+2\rho\right)}
+\end{align*}
+
+
+Since:
+
+\begin{align*}
+\int_{-\rho}^{\infty}\frac{dx}{x\left(x+2\rho\right)} & =\frac{1}{2\rho}\int_{-\rho}^{\infty}\left[\frac{1}{x}-\frac{1}{x+2\rho}\right]dx\\
+ & =\frac{1}{2\rho}\int_{-\rho}^{\rho}\left[\frac{1}{x}-\frac{1}{x+2\rho}\right]dx+\frac{1}{2\rho}\int_{\rho}^{\infty}\left[\frac{1}{x}-\frac{1}{x+2\rho}\right]dx\\
+ & =\frac{-1}{2\rho}\left[ln\left(x+2\rho\right)\right]_{-\rho}^{\rho}+\frac{1}{2\rho}\left[ln\left(\frac{x}{x+2\rho}\right)\right]_{\rho}^{\infty}\\
+ & =-\frac{1}{2\rho}ln\left(3\right)-\frac{1}{2\rho}ln\left(\frac{1}{3}\right)=0
+\end{align*}
+
+
+Therefore:
+
+\begin{align*}
+\int_{0}^{\infty}\frac{H(\rho,\rho^{\prime})}{\rho^{\prime2}-\rho^{2}}d\rho^{\prime}= & \int_{0}^{\infty}\frac{H(\rho,\rho^{\prime})-H(\rho,\rho)}{\rho^{\prime2}-\rho^{2}}d\rho^{\prime}
+\end{align*}
+
+
+In this way the integrand becomes finite at the singularity. So that,
+doing the integration numerically, becomes feasible.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\end{document}  

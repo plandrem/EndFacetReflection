@@ -437,28 +437,6 @@ def SolveForCoefficients(kd,n,incident_mode=0,pol='TE',polarity='even',
 	pres = p_res
 	p = np.linspace(1e-3,pmax,pres)
 
-
-
-	# try using a higher resolution near the singularity
-	# eps_k = 1e-2
-	# sing_res = pres
-	# p_l = np.linspace(1e-3,k-eps_k,pres/2.)
-	# p_sing = np.linspace(k-eps_k,k+eps_k,sing_res)	
-	# p_r = np.linspace(k+eps_k,pmax,pres/2.)
-
-	# p = np.concatenate((p_l,p_sing,p_r))
-	# p = np.unique(p) # remove duplicates
-
-
-	# use Gauss-Chebyshev points for integral evaluation
-	# weights, p = cheb.getPointsAndWeights(0,pmax,10)
-
-	# plt.ioff()
-	# plt.figure()
-	# plt.plot(p)
-	# plt.show()
-	# exit()
-
 	'''
 	2D mesh of p values for performing integration with matrices. Rows correspond to
 	the value of p', columns to p (for H(p',p)).
@@ -512,60 +490,19 @@ def SolveForCoefficients(kd,n,incident_mode=0,pol='TE',polarity='even',
 		integrand = Ht(qr,p1,p2)/(p1**2 - p2**2) 	# blows up at p1=p2
 		integrand = smoothMatrix(integrand)				# elminate singular points by using average of nearest neighbors.
 
-		if debug:
-			print integrand
-			print np.trapz(integrand,dx=1, axis=0)
-		
-		# if i == 1:
-		# 	plt.ioff()
-		# 	plt.figure()
-
-		# 	plt.plot(p/k,abs(integrand[0,:]),'r')
-		# 	plt.plot(p/k,abs(integrand[:,0]),'b')
-
-		# 	plt.figure()
-		# 	# print sp.log10(abs(integrand[250,0]))
-		# 	# print sp.log10(abs(integrand[250,1]))
-		# 	# plt.imshow(sp.log10(abs(Ht(qr,p1,p2))), extent = getExtent(p/k,p/k))
-		# 	plt.imshow(sp.log10(abs(integrand)), extent = getExtent(p/k,p/k))
-		# 	plt.colorbar()
-		# 	plt.show()
-		# 	exit()
-
 		qt = 1/(2*w*mu*P) * abs(Bc(p))/(B[m]+Bc(p)) * ( \
 			2*B[m]*G(m,p) \
 			+ np.sum([  (B[m]-B[j])*a[j]*G(j,p) for j in range(N) ], axis=0) \
-			# + sp.integrate.simps(integrand, x=p, axis=0) \
 			+ np.trapz(integrand, x=p, axis=0) \
 			+ qr * (B[m]-Bc(p)) * pi * Bt(p)*Br(p)*2*np.real(Dr(p))
 			)
 
 		a_prev = a
-		# a = [1/(4*w*mu*P) * sp.integrate.simps(qt * (B[j]-Bc(p)) * G(j,p), x=p) for j in range(N)]; a = np.array(a);
-		a = [1/(4*w*mu*P) * np.trapz(qt * (B[j]-Bc(p)) * G(j,p), x=p) for j in range(N)]; a = np.array(a);
+		a = [1/(4*w*mu*P) * sp.integrate.simps(qt * (B[j]-Bc(p)) * G(j,p), x=p) for j in range(N)]; a = np.array(a);
 
 		integrand = Hr(qt,p2,p1)/(p2**2 - p1**2) # blows up at p1=p2
 		integrand = smoothMatrix(integrand)
 
-		# if i == 0:
-		# 	plt.ioff()
-		# 	plt.figure()
-
-		# 	plt.plot(p/k,abs(integrand[0,:]),'r')
-		# 	plt.plot(p/k,abs(integrand[:,0]),'b')
-		# 	plt.plot(p/k, Br(p),'g')
-
-		# 	plt.figure()
-		# 	# print sp.log10(abs(integrand[250,0]))
-		# 	# print sp.log10(abs(integrand[250,1]))
-		# 	plt.imshow(np.real((Hr(qt,p2,p1) - Hr(qt,p2,p2))/(p2 + p1)), extent = getExtent(p/k,p/k))
-		# 	# plt.imshow(sp.log10(abs(Ht(qr,p1,p2))), extent = getExtent(p/k,p/k))
-		# 	# plt.imshow(sp.log10(abs(integrand)), extent = getExtent(p/k,p/k))
-		# 	plt.colorbar()
-		# 	plt.show()
-		# 	exit()
-
-		# qr = 1/(4*w*mu*P) * abs(Bc(p))/Bc(p) * sp.integrate.simps(integrand, x=p, axis=0)
 		qr = 1/(4*w*mu*P) * abs(Bc(p))/Bc(p) * np.trapz(integrand, x=p, axis=0)
 
 		if returnMode and i == returnItr:
@@ -666,9 +603,9 @@ def main():
 	# kd = d*pi/n
 
 	# Note: If kd is too small, BrentQ will fail to converge.
-	# kds = np.linspace(0.6,2.4,100)
+	kds = np.linspace(0.6,2.4,100)
 	# kds = np.linspace(0.1,0.5,50)
-	kds = np.linspace(1e-3,3,50)
+	# kds = np.linspace(1e-3,3,50)
 
 	n = sqrt(20)
 
@@ -718,7 +655,7 @@ def main():
 		ax[0].set_ylim(0,1.2)
 		
 		[ax[2].plot(kds[:kdi+1], accuracy, color='b', marker='o', lw=2) for i,am in enumerate(data)]
-		ax[2].set_ylim(0,1.5)
+		# ax[2].set_ylim(0.9,1.5)
 
 		fig.canvas.draw()
 
@@ -732,7 +669,7 @@ def main():
 
 	## export data
 	output = np.vstack((kds,data,np.array(accuracy, dtype=complex)))
-	print output
+	# print output
 
 	sname = DATA_PATH + '/Rectangular Resonator/End Facet Reflection Coefs/endFacet_a' + str(incident_mode) + '_' + pol + '_' + polarity + '_' + str(n) + '.txt'
 	np.savetxt(sname,output)

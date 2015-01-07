@@ -89,7 +89,6 @@ def beta_marcuse(n,d,wl=1.,pol='TM',polarity='even',Nmodes=None,plot=False):
 	even = (polarity=='even')
 
 	k = 2*pi/wl
-	kappa = np.linspace(0,n*k,10000)
 	gamma = lambda x: sqrt((n*k)**2 - x**2 - k**2)
 	
 
@@ -110,10 +109,10 @@ def beta_marcuse(n,d,wl=1.,pol='TM',polarity='even',Nmodes=None,plot=False):
 
 	# set markers for the k values where tan(kd) becomes discontinuous:
 	# ie. kd = (n + 1/2)*pi
-	N = numModes(n,1,k*d,polarity=polarity)
+	N = numModes(n,1,k*d,polarity=polarity)				# this is the maximum number of modes the system supports
 	bounds = [(_n+0.5)*pi/d for _n in range(N)]
 	bounds.insert(0,0)
-	bounds_eps = 1e-15
+	bounds_eps = 1e-15														# we need some infinitesimal spacer to avoid evaluating the function at the discontinuity
 
 	for j in range(N):
 
@@ -151,6 +150,8 @@ def beta_marcuse(n,d,wl=1.,pol='TM',polarity='even',Nmodes=None,plot=False):
 	if plot:
 
 		plt.ioff()
+
+		kappa = np.linspace(0,n*k,10000)
 
 		# print 'Number of modes:', Nmodes
 		print Ks*d/pi

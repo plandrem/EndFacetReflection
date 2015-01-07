@@ -92,17 +92,15 @@ def beta_marcuse(n,d,wl=1.,pol='TM',polarity='even',Nmodes=None,plot=False):
 	kappa = np.linspace(0,n*k,10000)
 	gamma = lambda x: sqrt((n*k)**2 - x**2 - k**2)
 	
+
+	# Define the transcendental function for the allowed transverse wavevectors. Note that this is a complex function
+	# but we only need to look for zeros on the real axis as long as our refractive index is purely real.
 	C = n**2 if pol == 'TM' else 1.
 
-	# if even:
-	# 	trans = lambda K: tan(K * d) - C   * (gamma(K)/K)
-	# else:
-	# 	trans = lambda K: tan(K * d) + 1/C * (K/gamma(K))
-
 	if even:
-		trans = lambda K: tan(K * d) - C * np.real(gamma(K)/K)
+		trans = lambda K: np.real( tan(K * d) - C   * (gamma(K)/K) )
 	else:
-		trans = lambda K: tan(K * d) + 1/C * np.real(K/gamma(K).real)
+		trans = lambda K: np.real( tan(K * d) + 1/C * (K/gamma(K)) )
 
 
 	# Find zero crossings, then use the brentq method to find the precise zero crossing 
@@ -110,49 +108,35 @@ def beta_marcuse(n,d,wl=1.,pol='TM',polarity='even',Nmodes=None,plot=False):
 
 	Ks = np.array([])
 
-
-	diff = np.diff(np.sign(trans(kappa)))
-
-	# need to accept alternating zero crossings - the true modes alternate with infinite discontinuites of the tangent function
-	toggle = True
-	for i,idx in enumerate(np.nonzero(diff)[0]):
-
-		if toggle and abs(diff[idx])==2:
-			k_low = kappa[idx-1]
-			k_high = kappa[idx+1]
-
-			try:
-				k_true = sp.optimize.brentq(trans,k_low,k_high)
-			except:
-				print 'BrentQ Failed. Plotting Transcendental function...'
-				print 'Zero Crossing: (%.3f)' % kappa[idx] * d/pi
-				print 'Attempted values of Kd/pi: (%.3f, %.3f)' % (k_low*d/pi, k_high*d/pi)
-				print 'Function evaluates to (%.3f, %.3f)' % (trans(k_low),trans(k_high))
-				k_true = np.nan
-				plot=True
-
-
-			print abs(trans(k_true))
-			Ks = np.append(Ks, k_true)
-			# if abs(trans(k_true)) < 1e-9: Ks = np.append(Ks, k_true)
-
-		toggle = not toggle
-
-	'''
-
 	# set markers for the k values where tan(kd) becomes discontinuous:
-	# kd = (n + 1/2)*pi
+	# ie. kd = (n + 1/2)*pi
 	N = numModes(n,1,k*d,polarity=polarity)
-	bounds = [(n+0.5)*pi/d for n in range(N)]
+	bounds = [(_n+0.5)*pi/d for _n in range(N)]
 	bounds.insert(0,0)
 	bounds_eps = 1e-15
 
 	for j in range(N):
-		k_zeroCrossing = sp.optimize.brentq(trans,bounds[j]+bounds_eps,bounds[j+1]-bounds_eps)
+
+		k_low = bounds[j]+bounds_eps
+		k_high = bounds[j+1]-bounds_eps
+
+		try:
+			k_zeroCrossing = sp.optimize.brentq(trans,k_low,k_high)
+		except ValueError:
+			print "BrentQ error:"
+			print k_low, k_high
+			print trans(k_low), trans(k_high)
+			k_zeroCrossing = np.nan
+			plot=True
+
 		Ks = np.append(Ks,k_zeroCrossing)
 
-	'''
+	# Done finding zero crossings for transcendental function.
 
+
+
+
+	# Convert from transverse wavevector to propagation constant, Beta
 	Bs = sqrt((n*k)**2 - Ks**2)
 
 	# Truncate or pad output as necessary
@@ -185,12 +169,12 @@ def beta_marcuse(n,d,wl=1.,pol='TM',polarity='even',Nmodes=None,plot=False):
 		plt.plot(kappa*d/pi, trans(kappa),'r')
 		plt.plot(kappa*d/pi, np.sign(trans(kappa)), 'k:')
 
-		for j in range(N):
-			plt.axvline(Ks[j]*d/pi)
+		# for j in range(N):
+		# 	plt.axvline(Ks[j]*d/pi)
 
 		plt.xlabel(r'$\kappa d/\pi$')
 		plt.axhline(0, c='k')
-		# plt.ylim(-10,10)
+		plt.ylim(-5,5)
 		plt.show()
 		exit()
 
@@ -1784,9 +1768,9 @@ if __name__ == '__main__':
 	# ReflectionWithHamidsCorrections(0.0242424252323,sqrt(20),p_res=500,p_max=5)
   # test_quad()
   # test_beta_marcuse_hamid()
-  # test_beta_marcuse()
+  test_beta_marcuse()
   # convergence_test_single()
-  main()	
+  # main()	
   # PrettyPlots()
 	# dummy()
 	# TestHarness()

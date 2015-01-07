@@ -373,7 +373,7 @@ def convergence_test_single():
 	plt.ioff()
 	plt.show()
 
-def ReflectionWithHamidsCorrections(kd,n,incident_mode=0,pol='TE',polarity='even',
+def SolveForCoefficients(kd,n,incident_mode=0,pol='TE',polarity='even',
 	p_max=20,p_res=1e3,imax=100,convergence_threshold=1e-5,first_order=False, debug=False, returnMode = None, returnItr = 0):
 
 	'''
@@ -429,7 +429,7 @@ def ReflectionWithHamidsCorrections(kd,n,incident_mode=0,pol='TE',polarity='even
 
 		qt = np.tile(qt,(len(qr),1)).transpose()
 
-		return -qt * (Bc(b) - Bc(a)) * k**2 * (eps-1) * Bt(b) * Br(a) * (  sin( (o(a)+b) *d)/(o(a)+b)  +  sin( (o(a)-b) *d)/(o(a)-b)  )
+		return -qt * (Bc(b) - Bc(a)) * k**2 * (eps-1) * Bt(b).conj() * Br(a).conj() * (  sin( (o(a)+b) *d)/(o(a)+b)  +  sin( (o(a)-b) *d)/(o(a)-b)  )
 
 
 	# Define mesh of p values
@@ -509,8 +509,8 @@ def ReflectionWithHamidsCorrections(kd,n,incident_mode=0,pol='TE',polarity='even
 
 		# TODO - process the lead terms before looping, since they are independent of the iteration
 		
-		integrand = (Ht(qr,p1,p2) - Ht(qr,p2,p2))/(p1**2 - p2**2) # blows up at p1=p2
-		integrand = smoothMatrix(integrand)											# elminate singular points by using average of nearest neighbors.
+		integrand = Ht(qr,p1,p2)/(p1**2 - p2**2) 	# blows up at p1=p2
+		integrand = smoothMatrix(integrand)				# elminate singular points by using average of nearest neighbors.
 
 		if debug:
 			print integrand
@@ -535,17 +535,16 @@ def ReflectionWithHamidsCorrections(kd,n,incident_mode=0,pol='TE',polarity='even
 		qt = 1/(2*w*mu*P) * abs(Bc(p))/(B[m]+Bc(p)) * ( \
 			2*B[m]*G(m,p) \
 			+ np.sum([  (B[m]-B[j])*a[j]*G(j,p) for j in range(N) ], axis=0) \
-			# + sp.integrate.quad(integrand, x=p, axis=0) \
-			+ sp.integrate.simps(integrand, x=p, axis=0) \
-			# + np.trapz(integrand, x=p, axis=0) \
+			# + sp.integrate.simps(integrand, x=p, axis=0) \
+			+ np.trapz(integrand, x=p, axis=0) \
 			+ qr * (B[m]-Bc(p)) * pi * Bt(p)*Br(p)*2*np.real(Dr(p))
 			)
 
 		a_prev = a
-		a = [1/(4*w*mu*P) * sp.integrate.simps(qt * (B[j]-Bc(p)) * G(j,p), x=p) for j in range(N)]; a = np.array(a);
-		# a = [1/(4*w*mu*P) * np.trapz(qt * (B[j]-Bc(p)) * G(j,p), x=p) for j in range(N)]; a = np.array(a);
+		# a = [1/(4*w*mu*P) * sp.integrate.simps(qt * (B[j]-Bc(p)) * G(j,p), x=p) for j in range(N)]; a = np.array(a);
+		a = [1/(4*w*mu*P) * np.trapz(qt * (B[j]-Bc(p)) * G(j,p), x=p) for j in range(N)]; a = np.array(a);
 
-		integrand = (Hr(qt,p2,p1) - Hr(qt,p2,p2))/(p2**2 - p1**2) # blows up at p1=p2
+		integrand = Hr(qt,p2,p1)/(p2**2 - p1**2) # blows up at p1=p2
 		integrand = smoothMatrix(integrand)
 
 		# if i == 0:
@@ -566,8 +565,8 @@ def ReflectionWithHamidsCorrections(kd,n,incident_mode=0,pol='TE',polarity='even
 		# 	plt.show()
 		# 	exit()
 
-		qr = 1/(4*w*mu*P) * abs(Bc(p))/Bc(p) * sp.integrate.simps(integrand, x=p, axis=0)
-		# qr = 1/(4*w*mu*P) * abs(Bc(p))/Bc(p) * np.trapz(integrand, x=p, axis=0)
+		# qr = 1/(4*w*mu*P) * abs(Bc(p))/Bc(p) * sp.integrate.simps(integrand, x=p, axis=0)
+		qr = 1/(4*w*mu*P) * abs(Bc(p))/Bc(p) * np.trapz(integrand, x=p, axis=0)
 
 		if returnMode and i == returnItr:
 			# bail and return whatever value we're testing
@@ -691,7 +690,7 @@ def main():
 	ams = []
 	accuracy = []
 
-	method = ReflectionWithHamidsCorrections
+	method = SolveForCoefficients
 
 	for kdi,kd in enumerate(kds):
 

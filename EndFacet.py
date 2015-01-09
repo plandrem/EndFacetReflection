@@ -304,7 +304,7 @@ def convergence_test_single():
 	pol='TE'
 	polarity = 'even'
 
-	imax = 200
+	imax = 50
 
 	plt.ion()
 
@@ -336,7 +336,7 @@ def convergence_test_single():
 	for i,res_i in enumerate(res):
 		for j,pmax_j in enumerate(p_max):
 
-			a, acc = Reflection(kd,n,
+			a, acc = SolveForCoefficients(kd,n,
 													pol=pol,
 													polarity=polarity,
 													incident_mode=incident_mode,
@@ -348,7 +348,7 @@ def convergence_test_single():
 													)
 
 			try:
-				aos[i,j] = a[0][0]
+				aos[i,j] = a[0]
 				accuracy[i,j] = acc
 			except TypeError:
 				pass
@@ -436,6 +436,10 @@ def SolveForCoefficients(kd,n,incident_mode=0,pol='TE',polarity='even',
 	pmax = p_max*k
 	pres = p_res
 	p = np.linspace(1e-3,pmax,pres)
+	
+	p_nearSingularity = np.linspace(1e-3,2*k,300)
+	p_toMax = np.linspace(2*k,pmax,pres)
+	p = np.hstack((p_nearSingularity[:-1],p_toMax))
 
 	'''
 	2D mesh of p values for performing integration with matrices. Rows correspond to
@@ -447,26 +451,6 @@ def SolveForCoefficients(kd,n,incident_mode=0,pol='TE',polarity='even',
 	a row vector representing a function of p.
 	'''
 	p2,p1 = np.meshgrid(p,p) 
-
-	# Test Helper Function evaluation on array objects
-	# Works without vectorization for single kd input
-	if debug:
-
-		print 'Test axes of matrices - p1 should change with row (1st index):'
-		print 'p1[0,0]:', p1[0,0]
-		print 'p1[1,0]:', p1[1,0]
-		print 'p1[0,1]:', p1[0,1]
-
-		print '\nG'
-		print G(0,p)
-		print '\np1'
-		print p1
-		print '\np2'
-		print p2
-		print '\nH'
-		print H(1,p1,p2)
-		print '\nHpp'
-		print H(1,p2,p2)
 
 	# Define initial states for an, qr
 	a = np.zeros(N, dtype=complex)
@@ -498,7 +482,7 @@ def SolveForCoefficients(kd,n,incident_mode=0,pol='TE',polarity='even',
 			)
 
 		a_prev = a
-		a = [1/(4*w*mu*P) * sp.integrate.simps(qt * (B[j]-Bc(p)) * G(j,p), x=p) for j in range(N)]; a = np.array(a);
+		a = [1/(4*w*mu*P) * np.trapz(qt * (B[j]-Bc(p)) * G(j,p), x=p) for j in range(N)]; a = np.array(a);
 
 		integrand = Hr(qt,p2,p1)/(p2**2 - p1**2) # blows up at p1=p2
 		integrand = smoothMatrix(integrand)
@@ -514,7 +498,8 @@ def SolveForCoefficients(kd,n,incident_mode=0,pol='TE',polarity='even',
 
 		# Test for convergence
 		delta = abs(a_prev-a)
-		print 'Delta a:', np.amax(delta)
+		print 'Delta a:', delta
+		# print 'Delta a:', np.amax(delta)
 		if not np.any(delta > convergence_threshold):
 		 repeat = False
 		 converged = True			
@@ -689,8 +674,11 @@ fix error for int type kds
 '''
 
 if __name__ == '__main__':
+  ### MAIN FUNCTIONS ###
+  # main()	
+	# PrettyPlots()
+
+	### TEST FUNCTIONS ###
   # test_beta_marcuse()
-  # convergence_test_single()
-  main()	
-  # PrettyPlots()
+  convergence_test_single()
 	# TestHarness()

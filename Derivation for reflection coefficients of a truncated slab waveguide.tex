@@ -454,14 +454,14 @@ Begin with the primary equations. Multiply each term by $E_{y}^{r*}(\rho)$ and i
 
 \begin{align*}
 0 + 0 + \int_{0}^{\infty} q^{r}(\rho) \int_{0}^{\infty} E_{y}^{r} (\rho ') E_{y}^{r*} (\rho) \; dx \; d\rho ' &= \int_{0}^{\infty} q^{t} (\rho ') \int_{0}^{\infty} E_{y}^{t}(\rho ') E_{y}^{r*}(\rho) \; dx \; d\rho ' \\
-q^{r}(\rho) \cdot \left( P \frac{\omega \mu}{|\beta (\rho)|} \right) &= \frac{1}{2} \int_{0}^{\infty} q^{t} (\rho ') F^{*}(\rho, \rho') \; d\rho'
+q^{r}(\rho) \cdot \left( P \frac{\omega \mu}{|\beta (\rho)|} \right) &= \frac{1}{2} \int_{0}^{\infty} q^{t} (\rho ') F(\rho, \rho') \; d\rho'
 \end{align*}
 
 \noindent Similarly, \eqref{eq:te-primary-two} becomes:
 
 \begin{align*}
 0 + 0 - \int_{0}^{\infty} q^{r}(\rho) \beta(\rho ') \int_{0}^{\infty} E_{y}^{r} (\rho ') E_{y}^{r*} (\rho) \; dx \; d\rho ' &= \int_{0}^{\infty} q^{t} (\rho ') \beta (\rho ') \int_{0}^{\infty} E_{y}^{t}(\rho ') E_{y}^{r*}(\rho) \; dx \; d\rho ' \\
-\beta(\rho) q^{r}(\rho) \cdot \left( P \frac{\omega \mu}{|\beta (\rho)|} \right) &= -\frac{1}{2} \int_{0}^{\infty} q^{t} (\rho ') \beta (\rho ') F^{*}(\rho, \rho') \; d\rho'
+\beta(\rho) q^{r}(\rho) \cdot \left( P \frac{\omega \mu}{|\beta (\rho)|} \right) &= -\frac{1}{2} \int_{0}^{\infty} q^{t} (\rho ') \beta (\rho ') F(\rho, \rho') \; d\rho'
 \end{align*}
 
 \noindent
@@ -469,8 +469,8 @@ q^{r}(\rho) \cdot \left( P \frac{\omega \mu}{|\beta (\rho)|} \right) &= \frac{1}
 Adding $\beta (\rho)$ times the former result to the latter yields, thus:
 
 \begin{align}
-2 \beta(\rho) &q^{r} \cdot \left( \frac{P \omega \mu}{|\beta(\rho)|} \right) = \frac{1}{2} \int_{0}^{\infty} q^{t} (\rho ') (\beta (\rho) - \beta(\rho ')) F^{*}(\rho, \rho ') \; d\rho' \nonumber \\
-\Rightarrow \; &q^{r} = \frac{1}{4 \omega \mu P} \frac{|\beta(\rho)|}{\beta(\rho)} \int_{0}^{\infty} q^{t} (\rho ') (\beta (\rho) - \beta(\rho ')) F^{*}(\rho, \rho ') \; d\rho'
+2 \beta(\rho) &q^{r} \cdot \left( \frac{P \omega \mu}{|\beta(\rho)|} \right) = \frac{1}{2} \int_{0}^{\infty} q^{t} (\rho ') (\beta (\rho) - \beta(\rho ')) F(\rho, \rho ') \; d\rho' \nonumber \\
+\Rightarrow \; &q^{r} = \frac{1}{4 \omega \mu P} \frac{|\beta(\rho)|}{\beta(\rho)} \int_{0}^{\infty} q^{t} (\rho ') (\beta (\rho) - \beta(\rho ')) F (\rho, \rho ') \; d\rho'
 \end{align}
 
 \subsection{Source Code}

@@ -1039,6 +1039,35 @@ a_{n} &= \frac{1}{4 \omega\mu P} \int_{0}^{\infty} q^{t}(\rho') [\beta_{n} - \be
 q^{r} &= \frac{1}{4\omega \mu P} \frac{|\beta(\rho)|}{\beta(\rho)}  \int_{0}^{\infty}q^{r}(\rho')[\beta(\rho) - \beta(\rho')] F^{*}(\rho,\rho') \; d\rho' 
 \end{align*}
 
+\noindent The integrals in these functions have two singularities: one at $\rho' = k_{o}$ and one at $\rho' = \rho$, both contained inside the function $F$. The latter of these will ultimately be removed by using Hamid's identity and subtracting the singularity out. Here, we will focus on dealing with the singularity at $\rho = k_{o}$.
+
+Gelin identifies a method for doing this in his paper, suggesting that the q functions can be rewritten as 
+
+\begin{align*}
+q^{t}(\rho) &= b(\rho)Z(\rho) \text{; and}\\
+q^{r}(\rho) &= d(\rho)Z(\rho) \\
+\text{such that } Z(\rho) &= \alpha \frac{\omega \mu}{|\beta(\rho)|}
+\end{align*}
+
+where $\alpha=1$ for $\rho \leq k_{o}$ and $\alpha=j$ for $\rho > k_{o}$. If we solve for $b(\rho)$, we have
+
+\begin{align*}
+b(\rho) &= \frac{q^{t}}{Z(\rho)} = \frac{|\beta(\rho)|}{\alpha \omega \mu} \frac{1}{2\omega \mu P} \frac{|\beta(\rho)|}{\beta_{m} + \beta(\rho)}  \bigg\{ 2 \beta_{m} G_{m}(\rho) + \sum_{n}(\beta_{m}-\beta_{n}) a_{n} G_{n}(\rho) \\
+&\hspace{32pt} + \int_{0}^{\infty}q^{r}(\rho')[\beta_{m} - \beta(\rho')] F(\rho',\rho) \; d\rho' \bigg\}
+\end{align*}
+
+We're going to bring the factor of $|\beta(\rho)|^{2}$ inside the brackets, and attempt to cancel terms inside the overlap integral functions. To this end, let's first focus on the product
+
+\begin{align*}
+|\beta(\rho)|^{2} G_n(\rho) = |\beta(\rho)|^{2} \cdot 2 A_{n} B^{t} k^{2} (\epsilon_{r} - 1) \bigg\{ \frac{\gamma \cos(\rho d) - \rho \sin(\rho d)}{(\kappa^{2} - \rho^{2})(\gamma^{2} + \rho^{2})} \bigg\}
+\end{align*}
+
+...actually F is more important, so we'll do that first:
+
+\begin{align*}
+|\beta(\rho)|^{2} F(\rho',\rho) = |\beta(\rho)|^{2} \cdot 2 B^{r} B^{t} k^{2} (\epsilon_{r} - 1) \bigg\{ \frac{\gamma \cos(\rho d) - \rho \sin(\rho d)}{(\kappa^{2} - \rho^{2})(\gamma^{2} + \rho^{2})} \bigg\}
+\end{align*}
+
 
 
 

@@ -411,35 +411,42 @@ def SolveForCoefficients(kd,n,incident_mode=0,pol='TE',polarity='even',
 	Br = lambda p: sqrt(2*p**2*w*mu*P / (pi*abs(Bc(p))*(p**2*cos(o(p)*d)**2 + o(p)**2*sin(o(p)*d)**2)))
 	Dr = lambda p: 1/2. * exp(-1j*p*d) * (cos(o(p)*d) + 1j*o(p)/p * sin(o(p)*d))
 
+	def Z(p):
+		alpha = 1 if p <= k else 1j
+		return alpha * w * mu / abs(Bc(p))
+	Z = np.vectorize(Z,otypes=[np.complex])
+
 	# Define Helper functions for integrals
 
 	G = lambda m,p: 2 * k**2 * (eps-1) * A[m] * Bt(p) * cos(K[m]*d) * (g[m]*cos(p*d) - p*sin(p*d)) / ((K[m]**2 - p**2)*(g[m]**2 + p**2))
 
-	def Ht(qr,a,b):
+	def Ht(dd,p1,p2):
 
 		'''
 		qr is taken in as simply qr(p). To correspond to qr(p') in this 2D matrix formulation, it needs
 		to be reshaped into a 2D matrix, whose values are dependent by row (0th axis), but not by column.
 		'''
-		qr = np.tile(qr,(len(qr),1)).transpose()
+		dd = np.tile(dd,(len(dd),1)).transpose()
 
-		return -qr * (B[m] - Bc(a)) * k**2 * (eps-1) * Bt(b) * Br(a) * (  sin( (o(a)+b) *d)/(o(a)+b)  +  sin( (o(a)-b) *d)/(o(a)-b)  )
+		return -dd * abs(Bc(p1)) * (B[m] - Bc(p1)) * k**2 * (eps-1) * Bt(p2) * Br(p1) * (  sin( (o(p1)+p2) *d)/(o(p1)+p2)  +  sin( (o(p1)-p2) *d)/(o(p1)-p2)  )
+		# return -d / Z(p1) * (B[m] - Bc(p1)) * k**2 * (eps-1) * Bt(p2) * Br(p1) * (  sin( (o(p1)+p2) *d)/(o(p1)+p2)  +  sin( (o(p1)-p2) *d)/(o(p1)-p2)  )
 
-	def Hr(qt,a,b):
+	def Hr(b,p1,p2):
 
-		qt = np.tile(qt,(len(qr),1)).transpose()
+		b = np.tile(b,(len(b),1)).transpose()
 
-		return -qt * (Bc(b) - Bc(a)) * k**2 * (eps-1) * Bt(b).conj() * Br(a).conj() * (  sin( (o(a)+b) *d)/(o(a)+b)  +  sin( (o(a)-b) *d)/(o(a)-b)  )
+		return -b * abs(Bc(p1)) * (Bc(p2) - Bc(p1)) * k**2 * (eps-1) * Bt(p2).conj() * Br(p1).conj() * (  sin( (o(p1)+p2) *d)/(o(p1)+p2)  +  sin( (o(p1)-p2) *d)/(o(p1)-p2)  )
+		# return -b / Z(p1) * (Bc(p2) - Bc(p1)) * k**2 * (eps-1) * Bt(p2).conj() * Br(p1).conj() * (  sin( (o(p1)+p2) *d)/(o(p1)+p2)  +  sin( (o(p1)-p2) *d)/(o(p1)-p2)  )
 
 
 	# Define mesh of p values
 	pmax = p_max*k
 	pres = p_res
-	# p = np.linspace(1e-3,pmax,pres)
+	p = np.linspace(1e-3,pmax,pres)
 	
-	p_nearSingularity = np.linspace(1e-3,2*k,p_res)
-	p_toMax = np.linspace(2*k,pmax,200)
-	p = np.hstack((p_nearSingularity[:-1],p_toMax))
+	# p_nearSingularity = np.linspace(1e-3,2*k,p_res)
+	# p_toMax = np.linspace(2*k,pmax,200)
+	# p = np.hstack((p_nearSingularity[:-1],p_toMax))
 
 	'''
 	2D mesh of p values for performing integration with matrices. Rows correspond to
@@ -454,7 +461,7 @@ def SolveForCoefficients(kd,n,incident_mode=0,pol='TE',polarity='even',
 
 	# Define initial states for an, qr
 	a = np.zeros(N, dtype=complex)
-	qr = np.zeros(len(p), dtype=complex)
+	dd = np.zeros(len(p), dtype=complex)
 
 	'''
 	Iteratively define qt,a,qr until the value of a converges to within some threshold.
@@ -471,29 +478,29 @@ def SolveForCoefficients(kd,n,incident_mode=0,pol='TE',polarity='even',
 
 		# TODO - process the lead terms before looping, since they are independent of the iteration
 		
-		integrand = Ht(qr,p1,p2)/(p1**2 - p2**2) 	# blows up at p1=p2
+		integrand = Ht(dd,p1,p2)/(p1**2 - p2**2) 	# blows up at p1=p2
 		integrand = smoothMatrix(integrand)				# elminate singular points by using average of nearest neighbors.
 
-		qt = 1/(2*w*mu*P) * abs(Bc(p))/(B[m]+Bc(p)) * ( \
-			2*B[m]*G(m,p) \
-			+ np.sum([  (B[m]-B[j])*a[j]*G(j,p) for j in range(N) ], axis=0) \
+		bb = 1/(2*w*mu*P) * abs(Bc(p))/(B[m]+Bc(p)) * ( \
+			2*B[m]*G(m,p) * abs(Bc(p)) \
+			+ np.sum([  (B[m]-B[j])*a[j]*G(j,p) * abs(Bc(p)) for j in range(N) ], axis=0) \
 			+ np.trapz(integrand, x=p, axis=0) \
-			+ qr * (B[m]-Bc(p)) * pi * Bt(p)*Br(p)*2*np.real(Dr(p))
+			+ dd * abs(Bc(p)) * (B[m]-Bc(p)) * pi * Bt(p)*Br(p)*2*np.real(Dr(p))
 			)
 
 		a_prev = a
-		a = [1/(4*w*mu*P) * np.trapz(qt * (B[j]-Bc(p)) * G(j,p), x=p) for j in range(N)]; a = np.array(a);
+		a = [1/(4*w*mu*P) * np.trapz(bb * abs(Bc(p)) * (B[j]-Bc(p)) * G(j,p).conj(), x=p) for j in range(N)]; a = np.array(a);
 
-		integrand = Hr(qt,p2,p1)/(p2**2 - p1**2) # blows up at p1=p2
+		integrand = Hr(bb,p2,p1)/(p2**2 - p1**2) # blows up at p1=p2
 		integrand = smoothMatrix(integrand)
 
-		qr = 1/(4*w*mu*P) * abs(Bc(p))/Bc(p) * np.trapz(integrand, x=p, axis=0)
+		dd = 1/(4*w*mu*P) * abs(Bc(p))/Bc(p) * np.trapz(integrand, x=p, axis=0)
 
-		if returnMode and i == returnItr:
-			# bail and return whatever value we're testing
-			if returnMode == 'qt': return (p,qt)
-			if returnMode == 'qr': return (p,qr)
-			if returnMode == 'a_integral': return (p,qt * (B[j]-Bc(p)) * G(j,p))
+		# if returnMode and i == returnItr:
+		# 	# bail and return whatever value we're testing
+		# 	if returnMode == 'qt': return (p,qt)
+		# 	if returnMode == 'qr': return (p,qr)
+		# 	if returnMode == 'a_integral': return (p,qt * (B[j]-Bc(p)) * G(j,p))
 
 
 		# Test for convergence
@@ -516,7 +523,7 @@ def SolveForCoefficients(kd,n,incident_mode=0,pol='TE',polarity='even',
 	Loop completed. Perform Error tests
 	'''
 
-	shouldBeOne = 1/(4*w*mu*P) * np.trapz(qt*(B[m]+Bc(p))*G(m,p), x=p)
+	shouldBeOne = 1/(4*w*mu*P) * np.trapz(bb*abs(Bc(p))*(B[m]+Bc(p))*G(m,p), x=p)
 
 	'''
 	Output results
@@ -527,6 +534,13 @@ def SolveForCoefficients(kd,n,incident_mode=0,pol='TE',polarity='even',
 		print '|a|:', abs(a)
 		print '<a:', np.angle(a)
 		print 'shouldBeOne:', shouldBeOne
+
+
+	plt.ioff()
+	plt.figure()
+	plt.plot(p,bb)
+	plt.show()
+	exit()
 
 	if converged:
 		return a, np.array(shouldBeOne)
@@ -579,7 +593,7 @@ def main():
 
 	# Define Key Simulation Parameters
 	
-	# kds = np.array([3.])
+	kds = np.array([0.628])
 	
 	# kds = np.array([0.209,0.418,0.628,0.837,1.04,1.25]) # TE Reference values
 	# kds = np.array([0.314,0.418,0.628,0.837,1.04,1.25]) # TM Reference Values
@@ -590,9 +604,9 @@ def main():
 	# Note: If kd is too small, BrentQ will fail to converge.
 	# kds = np.linspace(0.6,2.4,100)
 	# kds = np.linspace(0.1,0.5,50)
-	kds = np.linspace(1e-2,3,200)
+	# kds = np.linspace(1e-2,3,200)
 
-	n = 4
+	n = sqrt(20)
 
 	res = 200
 	incident_mode = 0

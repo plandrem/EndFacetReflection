@@ -414,29 +414,28 @@ def SolveForCoefficients(kd,n,incident_mode=0,pol='TE',polarity='even',
 	def Z(p):
 		alpha = 1 if p <= k else 1j
 		return alpha * w * mu / abs(Bc(p))
+		# return abs(Bc(p))
 	Z = np.vectorize(Z,otypes=[np.complex])
 
 	# Define Helper functions for integrals
 
 	G = lambda m,p: 2 * k**2 * (eps-1) * A[m] * Bt(p) * cos(K[m]*d) * (g[m]*cos(p*d) - p*sin(p*d)) / ((K[m]**2 - p**2)*(g[m]**2 + p**2))
 
-	def Ht(dd,p1,p2):
+	def Ht(qr,p1,p2):
 
 		'''
 		qr is taken in as simply qr(p). To correspond to qr(p') in this 2D matrix formulation, it needs
 		to be reshaped into a 2D matrix, whose values are dependent by row (0th axis), but not by column.
 		'''
-		dd = np.tile(dd,(len(dd),1)).transpose()
+		qr = np.tile(qr,(len(qr),1)).transpose()
 
-		# return -dd * abs(Bc(p1)) * (B[m] - Bc(p1)) * k**2 * (eps-1) * Bt(p2) * Br(p1) * (  sin( (o(p1)+p2) *d)/(o(p1)+p2)  +  sin( (o(p1)-p2) *d)/(o(p1)-p2)  )
-		return -dd / Z(p1) * (B[m] - Bc(p1)) * k**2 * (eps-1) * Bt(p2) * Br(p1) * (  sin( (o(p1)+p2) *d)/(o(p1)+p2)  +  sin( (o(p1)-p2) *d)/(o(p1)-p2)  )
+		return -qr * (B[m] - Bc(p1)) * k**2 * (eps-1) * Bt(p2) * Br(p1) * (  sin( (o(p1)+p2) *d)/(o(p1)+p2)  +  sin( (o(p1)-p2) *d)/(o(p1)-p2)  )
 
-	def Hr(b,p1,p2):
+	def Hr(qt,p1,p2):
 
-		b = np.tile(b,(len(b),1)).transpose()
+		qt = np.tile(qt,(len(qt),1)).transpose()
 
-		# return -b * abs(Bc(p1)) * (Bc(p2) - Bc(p1)) * k**2 * (eps-1) * Bt(p2).conj() * Br(p1).conj() * (  sin( (o(p1)+p2) *d)/(o(p1)+p2)  +  sin( (o(p1)-p2) *d)/(o(p1)-p2)  )
-		return -b / Z(p1) * (Bc(p2) - Bc(p1)) * k**2 * (eps-1) * Bt(p2).conj() * Br(p1).conj() * (  sin( (o(p1)+p2) *d)/(o(p1)+p2)  +  sin( (o(p1)-p2) *d)/(o(p1)-p2)  )
+		return -qt * (Bc(p2) - Bc(p1)) * k**2 * (eps-1) * Bt(p2).conj() * Br(p1).conj() * (  sin( (o(p1)+p2) *d)/(o(p1)+p2)  +  sin( (o(p1)-p2) *d)/(o(p1)-p2)  )
 
 
 	# Define mesh of p values
@@ -457,7 +456,7 @@ def SolveForCoefficients(kd,n,incident_mode=0,pol='TE',polarity='even',
 	Integrating over p' would then amount to summing over axis=0. This sums the rows of the matrix H, producing 
 	a row vector representing a function of p.
 	'''
-	p2,p1 = np.meshgrid(p,p) 
+	p2,p1 = np.meshgrid(p,p)
 
 	# Define initial states for an, qr
 	a = np.zeros(N, dtype=complex)
@@ -478,23 +477,23 @@ def SolveForCoefficients(kd,n,incident_mode=0,pol='TE',polarity='even',
 
 		# TODO - process the lead terms before looping, since they are independent of the iteration
 		
-		integrand = Ht(dd,p1,p2)/(p1**2 - p2**2) 	# blows up at p1=p2
+		integrand = Ht(dd*Z(p),p1,p2)/(p1**2 - p2**2) 	# blows up at p1=p2
 		integrand = smoothMatrix(integrand)				# elminate singular points by using average of nearest neighbors.
 
 		bb = 1/(2*w*mu*P) * abs(Bc(p))/(B[m]+Bc(p)) * ( \
 			2*B[m]*G(m,p) /Z(p) \
 			+ np.sum([  (B[m]-B[j])*a[j]*G(j,p) /Z(p) for j in range(N) ], axis=0) \
-			+ np.trapz(integrand, x=p, axis=0) \
-			+ dd /Z(p) * (B[m]-Bc(p)) * pi * Bt(p)*Br(p)*2*np.real(Dr(p))
+			+ np.trapz(integrand/Z(p2), x=p, axis=0) \
+			+ dd * (B[m]-Bc(p)) * pi * Bt(p)*Br(p)*2*np.real(Dr(p))
 			)
 
 		a_prev = a
-		a = [1/(4*w*mu*P) * np.trapz(bb /Z(p) * (B[j]-Bc(p)) * G(j,p).conj(), x=p) for j in range(N)]; a = np.array(a);
+		a = [1/(4*w*mu*P) * np.trapz(bb*Z(p) * (B[j]-Bc(p)) * G(j,p).conj(), x=p) for j in range(N)]; a = np.array(a);
 
-		integrand = Hr(bb,p2,p1)/(p2**2 - p1**2) # blows up at p1=p2
+		integrand = Hr(bb*Z(p),p2,p1)/(p2**2 - p1**2) # blows up at p1=p2
 		integrand = smoothMatrix(integrand)
 
-		dd = 1/(4*w*mu*P) * abs(Bc(p))/Bc(p) * np.trapz(integrand, x=p, axis=0)
+		dd = 1/(4*w*mu*P) * abs(Bc(p))/Bc(p) * np.trapz(integrand/Z(p2), x=p, axis=0)
 
 		# if returnMode and i == returnItr:
 		# 	# bail and return whatever value we're testing
@@ -538,7 +537,8 @@ def SolveForCoefficients(kd,n,incident_mode=0,pol='TE',polarity='even',
 
 	plt.ioff()
 	plt.figure()
-	plt.plot(p,bb)
+	plt.plot(p,bb*Z(0),'r')
+	plt.plot(p,dd*Z(0),'b')
 	plt.show()
 	exit()
 
@@ -593,7 +593,7 @@ def main():
 
 	# Define Key Simulation Parameters
 	
-	kds = np.array([0.628])
+	# kds = np.array([0.628])
 	
 	# kds = np.array([0.209,0.418,0.628,0.837,1.04,1.25]) # TE Reference values
 	# kds = np.array([0.314,0.418,0.628,0.837,1.04,1.25]) # TM Reference Values
@@ -604,7 +604,7 @@ def main():
 	# Note: If kd is too small, BrentQ will fail to converge.
 	# kds = np.linspace(0.6,2.4,100)
 	# kds = np.linspace(0.1,0.5,50)
-	# kds = np.linspace(1e-2,3,200)
+	kds = np.linspace(1e-2,3,50)
 
 	n = sqrt(20)
 
@@ -614,7 +614,7 @@ def main():
 	polarity = 'even'
 
 	imax = 200
-	p_max = 15
+	p_max = 20
 
 	plt.ion()
 	

@@ -200,13 +200,6 @@ q^{t}(\rho) =
 
 \noindent This formula matches that in the Appendix of Gelin 1981, except that I have substituted $f$ and $\zeta$ in place of the explicit overlap integrals.
 
-\subsection{Source Code}
-
-\begin{lstlisting}
-integral = np.trapz(qr1 * (Bo*vm*z - Bc1*kpm*f), x=p1, axis=1)
-sigma = np.sum([(Bo*vm*kp[n] - Bm[n]*V[n]*kpm) * am[n] for n in range(N)], axis=0)
-qt = 1/(w*eo*P) * abs(Bc) / (Bo*vm+Bc*kpm) * (2*Bo*vm*kpm + integral + sigma)
-\end{lstlisting}
 
 \subsection{Solving for $a_{n}$}
 
@@ -255,14 +248,6 @@ Combining \eqref{eq:an-tm-1} + \eqref{eq:an-tm-2} yields:
 2 a_{n} &= \frac{1}{\omega \epsilon_{o} P} \left\{\int_{0}^{\infty} q^{t} (\rho ') [\beta_{n}\nu_{n}(\rho ') - \beta(\rho ')\kappa_{n}(\rho ')] +P \omega \epsilon_{o}\delta_{m,n} - P \omega \epsilon_{o}\delta_{m,n} \; d\rho ' \right\} \nonumber \\
 a_{n} &= \frac{1}{2 \omega \epsilon_{o} P} \left\{\int_{0}^{\infty} q^{t} (\rho ') [\beta_{n}\nu_{n}(\rho ') - \beta(\rho ')\kappa_{n}(\rho ')] \, d\rho ' \right\}
 \end{align}
-
-
-\subsection{Source Code}
-
-\begin{lstlisting}
-am = np.array([ (1/(2*w*eo*P) * np.trapz(qt * (Bm[n]*V[n] - Bc*kp[n]), x=p, axis=0)) for n in range(N) ])
-\end{lstlisting}
-
 
 
 
@@ -316,12 +301,6 @@ Combining \eqref{eq:qt-tm-1} + \eqref{eq:qt-tm-2} yields:
 q^{r}(\rho ) &= \frac{1}{2 \omega \epsilon_{o} P} \frac{|\beta(\rho)|}{\beta(\rho)}\int_{0}^{\infty} q^{t} (\rho ') [\beta(\rho) f(\rho, \rho ') - \beta(\rho ') \zeta(\rho, \rho ')] \, d\rho '
 \end{align}
 
-\subsection{Source Code}
-
-\begin{lstlisting}
-integral = np.trapz(qt1 * (Bc2 * f.transpose(1,0,2) - Bc1 * z.transpose(1,0,2)), x=p1, axis=1)	
-qr = 1/(2*w*eo*P) * (abs(Bc)/Bc) * integral
-\end{lstlisting}
 
 %%% TE Primary Equations %%%
 \newpage
@@ -403,15 +382,6 @@ q^{t}(\rho) =
 
 \noindent This formula matches (5) in Gelin 1981.
 
-\subsection{Source Code}
-
-\begin{lstlisting}
-qr1 = np.tile(qr,(len(p),1,1))
-integral = np.trapz(qr1 * (Bo-Bc1) * F, x=p1, axis=1)
-# integral = np.sum(qr1 * (Bo-Bc1) * F, axis=1) * dp
-sigma = np.sum([(Bo-Bm[n]) * am[n] * G[n,:] for n in range(N)], axis=0)
-qt = 1/(2*w*mu*P) * abs(Bc) / (Bo+Bc) * (2*Bo*G[incident_mode,:] + integral + sigma)
-\end{lstlisting}
 
 
 \subsection{$a_{n}$}
@@ -440,11 +410,6 @@ Adding $\beta_{n}$ times the former result to the latter yields, thus:
 \Rightarrow \; &a_{n} = \frac{1}{4 \omega \mu P} \int_{0}^{\infty} q^{t} (\rho ') (\beta_{n} - \beta(\rho ')) G_{n} (\rho ') \; d\rho' \\
 \end{align}
 
-\subsection{Source Code}
-
-\begin{lstlisting}
-am = np.array([ (1/(4*w*mu*P) * np.trapz(qt * (Bm[n]-Bc) * G[n,:], x=p, axis=0)) for n in range(N) ])
-\end{lstlisting}
 
 
 
@@ -454,14 +419,14 @@ Begin with the primary equations. Multiply each term by $E_{y}^{r*}(\rho)$ and i
 
 \begin{align*}
 0 + 0 + \int_{0}^{\infty} q^{r}(\rho) \int_{0}^{\infty} E_{y}^{r} (\rho ') E_{y}^{r*} (\rho) \; dx \; d\rho ' &= \int_{0}^{\infty} q^{t} (\rho ') \int_{0}^{\infty} E_{y}^{t}(\rho ') E_{y}^{r*}(\rho) \; dx \; d\rho ' \\
-q^{r}(\rho) \cdot \left( P \frac{\omega \mu}{|\beta (\rho)|} \right) &= \frac{1}{2} \int_{0}^{\infty} q^{t} (\rho ') F(\rho, \rho') \; d\rho'
+q^{r}(\rho) \cdot \left( P \frac{\omega \mu}{|\beta (\rho)|} \right) &= \frac{1}{2} \int_{0}^{\infty} q^{t} (\rho ') F^{*}(\rho, \rho') \; d\rho'
 \end{align*}
 
 \noindent Similarly, \eqref{eq:te-primary-two} becomes:
 
 \begin{align*}
 0 + 0 - \int_{0}^{\infty} q^{r}(\rho) \beta(\rho ') \int_{0}^{\infty} E_{y}^{r} (\rho ') E_{y}^{r*} (\rho) \; dx \; d\rho ' &= \int_{0}^{\infty} q^{t} (\rho ') \beta (\rho ') \int_{0}^{\infty} E_{y}^{t}(\rho ') E_{y}^{r*}(\rho) \; dx \; d\rho ' \\
-\beta(\rho) q^{r}(\rho) \cdot \left( P \frac{\omega \mu}{|\beta (\rho)|} \right) &= -\frac{1}{2} \int_{0}^{\infty} q^{t} (\rho ') \beta (\rho ') F(\rho, \rho') \; d\rho'
+\beta(\rho) q^{r}(\rho) \cdot \left( P \frac{\omega \mu}{|\beta (\rho)|} \right) &= -\frac{1}{2} \int_{0}^{\infty} q^{t} (\rho ') \beta (\rho ') F^{*}(\rho, \rho') \; d\rho'
 \end{align*}
 
 \noindent
@@ -469,17 +434,10 @@ q^{r}(\rho) \cdot \left( P \frac{\omega \mu}{|\beta (\rho)|} \right) &= \frac{1}
 Adding $\beta (\rho)$ times the former result to the latter yields, thus:
 
 \begin{align}
-2 \beta(\rho) &q^{r} \cdot \left( \frac{P \omega \mu}{|\beta(\rho)|} \right) = \frac{1}{2} \int_{0}^{\infty} q^{t} (\rho ') (\beta (\rho) - \beta(\rho ')) F(\rho, \rho ') \; d\rho' \nonumber \\
-\Rightarrow \; &q^{r} = \frac{1}{4 \omega \mu P} \frac{|\beta(\rho)|}{\beta(\rho)} \int_{0}^{\infty} q^{t} (\rho ') (\beta (\rho) - \beta(\rho ')) F (\rho, \rho ') \; d\rho'
+2 \beta(\rho) &q^{r} \cdot \left( \frac{P \omega \mu}{|\beta(\rho)|} \right) = \frac{1}{2} \int_{0}^{\infty} q^{t} (\rho ') (\beta (\rho) - \beta(\rho ')) F^{*}(\rho, \rho ') \; d\rho' \nonumber \\
+\Rightarrow \; &q^{r} = \frac{1}{4 \omega \mu P} \frac{|\beta(\rho)|}{\beta(\rho)} \int_{0}^{\infty} q^{t} (\rho ') (\beta (\rho) - \beta(\rho ')) F^{*}(\rho, \rho ') \; d\rho'
 \end{align}
 
-\subsection{Source Code}
-
-\begin{lstlisting}
-integral = np.trapz(qt1 * (Bc2-Bc1) * F.transpose(1,0,2), x=p1, axis=1)
-# integral = np.sum(qt1 * (Bc2-Bc1) * F.transpose(1,0,2), axis=1) * dp
-qr = 1/(4*w*mu*P) * (abs(Bc)/Bc) * integral
-\end{lstlisting}
 
 
 
@@ -1070,6 +1028,16 @@ Therefore:
 In this way the integrand becomes finite at the singularity. So that,
 doing the integration numerically, becomes feasible.
 
+
+\section{Recasting $q^{t}$ and $q^{r}$ as $b$ and $d$}
+
+We have rederived the formulas in Gelin's paper for the TE Even modes:
+
+\begin{align*}
+q^{t} &= \frac{1}{2\omega \mu P} \frac{|\beta(\rho)|}{\beta_{m} + \beta(\rho)}  \bigg\{ 2 \beta_{m} G_{m}(\rho) + \sum_{n}(\beta_{m}-\beta_{n}) a_{n} G_{n}(\rho) + \int_{0}^{\infty}q^{r}(\rho')[\beta_{m} - \beta(\rho')] F(\rho',\rho) \; d\rho' \bigg\} \\
+a_{n} &= \frac{1}{4 \omega\mu P} \int_{0}^{\infty} q^{t}(\rho') [\beta_{n} - \beta(\rho')] G_{n}(\rho') \; d\rho' \\
+q^{r} &= \frac{1}{4\omega \mu P} \frac{|\beta(\rho)|}{\beta(\rho)}  \int_{0}^{\infty}q^{r}(\rho')[\beta(\rho) - \beta(\rho')] F^{*}(\rho,\rho') \; d\rho' 
+\end{align*}
 
 
 

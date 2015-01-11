@@ -137,7 +137,7 @@ def beta_marcuse(n,d,wl=1.,pol='TM',polarity='even',Nmodes=None,plot=False):
 	N = numModes(n,1,k*d,polarity=polarity)				# this is the maximum number of modes the system supports
 	bounds = [(_n+0.5)*pi/d for _n in range(N)]
 	bounds.insert(0,0)
-	bounds_eps = 1e-15														# we need some infinitesimal spacer to avoid evaluating the function at the discontinuity
+	bounds_eps = 1e-9														# we need some infinitesimal spacer to avoid evaluating the function at the discontinuity
 
 	for j in range(N):
 
@@ -176,7 +176,7 @@ def beta_marcuse(n,d,wl=1.,pol='TM',polarity='even',Nmodes=None,plot=False):
 
 		plt.ioff()
 
-		kappa = np.linspace(0,n*k,10000)
+		kappa = np.linspace(0,bounds[-1]-bounds_eps,10000)
 
 		# print 'Number of modes:', Nmodes
 		print Ks*d/pi
@@ -435,10 +435,10 @@ def SolveForCoefficients(kd,n,incident_mode=0,pol='TE',polarity='even',
 	# Define mesh of p values
 	pmax = p_max*k
 	pres = p_res
-	p = np.linspace(1e-3,pmax,pres)
+	# p = np.linspace(1e-3,pmax,pres)
 	
-	p_nearSingularity = np.linspace(1e-3,2*k,300)
-	p_toMax = np.linspace(2*k,pmax,pres)
+	p_nearSingularity = np.linspace(1e-3,2*k,p_res)
+	p_toMax = np.linspace(2*k,pmax,200)
 	p = np.hstack((p_nearSingularity[:-1],p_toMax))
 
 	'''
@@ -588,19 +588,19 @@ def main():
 	# kd = d*pi/n
 
 	# Note: If kd is too small, BrentQ will fail to converge.
-	kds = np.linspace(0.6,2.4,100)
+	# kds = np.linspace(0.6,2.4,100)
 	# kds = np.linspace(0.1,0.5,50)
-	# kds = np.linspace(1e-3,3,50)
+	kds = np.linspace(1e-2,3,200)
 
-	n = sqrt(20)
+	n = 4
 
 	res = 200
 	incident_mode = 0
 	pol='TE'
 	polarity = 'even'
 
-	imax = 50
-	p_max = 10
+	imax = 200
+	p_max = 15
 
 	plt.ion()
 	
@@ -675,10 +675,10 @@ fix error for int type kds
 
 if __name__ == '__main__':
   ### MAIN FUNCTIONS ###
-  # main()	
+  main()	
 	# PrettyPlots()
 
 	### TEST FUNCTIONS ###
   # test_beta_marcuse()
-  convergence_test_single()
+  # convergence_test_single()
 	# TestHarness()

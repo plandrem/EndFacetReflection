@@ -428,15 +428,15 @@ def SolveForCoefficients(kd,n,incident_mode=0,pol='TE',polarity='even',
 		'''
 		dd = np.tile(dd,(len(dd),1)).transpose()
 
-		return -dd * abs(Bc(p1)) * (B[m] - Bc(p1)) * k**2 * (eps-1) * Bt(p2) * Br(p1) * (  sin( (o(p1)+p2) *d)/(o(p1)+p2)  +  sin( (o(p1)-p2) *d)/(o(p1)-p2)  )
-		# return -d / Z(p1) * (B[m] - Bc(p1)) * k**2 * (eps-1) * Bt(p2) * Br(p1) * (  sin( (o(p1)+p2) *d)/(o(p1)+p2)  +  sin( (o(p1)-p2) *d)/(o(p1)-p2)  )
+		# return -dd * abs(Bc(p1)) * (B[m] - Bc(p1)) * k**2 * (eps-1) * Bt(p2) * Br(p1) * (  sin( (o(p1)+p2) *d)/(o(p1)+p2)  +  sin( (o(p1)-p2) *d)/(o(p1)-p2)  )
+		return -dd / Z(p1) * (B[m] - Bc(p1)) * k**2 * (eps-1) * Bt(p2) * Br(p1) * (  sin( (o(p1)+p2) *d)/(o(p1)+p2)  +  sin( (o(p1)-p2) *d)/(o(p1)-p2)  )
 
 	def Hr(b,p1,p2):
 
 		b = np.tile(b,(len(b),1)).transpose()
 
-		return -b * abs(Bc(p1)) * (Bc(p2) - Bc(p1)) * k**2 * (eps-1) * Bt(p2).conj() * Br(p1).conj() * (  sin( (o(p1)+p2) *d)/(o(p1)+p2)  +  sin( (o(p1)-p2) *d)/(o(p1)-p2)  )
-		# return -b / Z(p1) * (Bc(p2) - Bc(p1)) * k**2 * (eps-1) * Bt(p2).conj() * Br(p1).conj() * (  sin( (o(p1)+p2) *d)/(o(p1)+p2)  +  sin( (o(p1)-p2) *d)/(o(p1)-p2)  )
+		# return -b * abs(Bc(p1)) * (Bc(p2) - Bc(p1)) * k**2 * (eps-1) * Bt(p2).conj() * Br(p1).conj() * (  sin( (o(p1)+p2) *d)/(o(p1)+p2)  +  sin( (o(p1)-p2) *d)/(o(p1)-p2)  )
+		return -b / Z(p1) * (Bc(p2) - Bc(p1)) * k**2 * (eps-1) * Bt(p2).conj() * Br(p1).conj() * (  sin( (o(p1)+p2) *d)/(o(p1)+p2)  +  sin( (o(p1)-p2) *d)/(o(p1)-p2)  )
 
 
 	# Define mesh of p values
@@ -482,14 +482,14 @@ def SolveForCoefficients(kd,n,incident_mode=0,pol='TE',polarity='even',
 		integrand = smoothMatrix(integrand)				# elminate singular points by using average of nearest neighbors.
 
 		bb = 1/(2*w*mu*P) * abs(Bc(p))/(B[m]+Bc(p)) * ( \
-			2*B[m]*G(m,p) * abs(Bc(p)) \
-			+ np.sum([  (B[m]-B[j])*a[j]*G(j,p) * abs(Bc(p)) for j in range(N) ], axis=0) \
+			2*B[m]*G(m,p) /Z(p) \
+			+ np.sum([  (B[m]-B[j])*a[j]*G(j,p) /Z(p) for j in range(N) ], axis=0) \
 			+ np.trapz(integrand, x=p, axis=0) \
-			+ dd * abs(Bc(p)) * (B[m]-Bc(p)) * pi * Bt(p)*Br(p)*2*np.real(Dr(p))
+			+ dd /Z(p) * (B[m]-Bc(p)) * pi * Bt(p)*Br(p)*2*np.real(Dr(p))
 			)
 
 		a_prev = a
-		a = [1/(4*w*mu*P) * np.trapz(bb * abs(Bc(p)) * (B[j]-Bc(p)) * G(j,p).conj(), x=p) for j in range(N)]; a = np.array(a);
+		a = [1/(4*w*mu*P) * np.trapz(bb /Z(p) * (B[j]-Bc(p)) * G(j,p).conj(), x=p) for j in range(N)]; a = np.array(a);
 
 		integrand = Hr(bb,p2,p1)/(p2**2 - p1**2) # blows up at p1=p2
 		integrand = smoothMatrix(integrand)

@@ -482,8 +482,8 @@ def SolveForCoefficients(kd,n,incident_mode=0,pol='TE',polarity='even',
 
 		bb = 1/(2*w*mu*P) * abs(Bc(p))/(B[m]+Bc(p)) * ( \
 			2*B[m]*G(m,p) /Z(p) \
-			+ np.sum([  (B[m]-B[j])*a[j]*G(j,p) /Z(p) for j in range(N) ], axis=0) \
-			+ np.trapz(integrand/Z(p2), x=p, axis=0) \
+			+ np.sum([  (B[m]-B[j])*a[j]*G(j,p) for j in range(N) ], axis=0)/Z(p) \
+			+ np.trapz(integrand/Z(p2), x=p, axis=0) /Z(p) \
 			+ dd * (B[m]-Bc(p)) * pi * Bt(p)*Br(p)*2*np.real(Dr(p))
 			)
 
@@ -593,7 +593,7 @@ def main():
 
 	# Define Key Simulation Parameters
 	
-	# kds = np.array([0.628])
+	kds = np.array([0.628])
 	
 	# kds = np.array([0.209,0.418,0.628,0.837,1.04,1.25]) # TE Reference values
 	# kds = np.array([0.314,0.418,0.628,0.837,1.04,1.25]) # TM Reference Values
@@ -604,17 +604,17 @@ def main():
 	# Note: If kd is too small, BrentQ will fail to converge.
 	# kds = np.linspace(0.6,2.4,100)
 	# kds = np.linspace(0.1,0.5,50)
-	kds = np.linspace(1e-2,3,50)
+	# kds = np.linspace(1e-2,3,50)
 
 	n = sqrt(20)
 
-	res = 200
+	res = 600
 	incident_mode = 0
 	pol='TE'
 	polarity = 'even'
 
 	imax = 200
-	p_max = 20
+	p_max = 50
 
 	plt.ion()
 	

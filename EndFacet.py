@@ -441,11 +441,11 @@ def SolveForCoefficients(kd,n,incident_mode=0,pol='TE',polarity='even',
 	# Define mesh of p values
 	pmax = p_max*k
 	pres = p_res
-	p = np.linspace(1e-3,pmax,pres)
+	# p = np.linspace(1e-3,pmax,pres)
 	
-	# p_nearSingularity = np.linspace(1e-3,2*k,3*p_res)
-	# p_toMax = np.linspace(2*k,pmax,200)
-	# p = np.hstack((p_nearSingularity[:-1],p_toMax))
+	p_nearSingularity = np.linspace(1e-3,2*k,3*p_res)
+	p_toMax = np.linspace(2*k,pmax,200)
+	p = np.hstack((p_nearSingularity[:-1],p_toMax))
 
 
 	'''
@@ -498,15 +498,6 @@ def SolveForCoefficients(kd,n,incident_mode=0,pol='TE',polarity='even',
 		integrand = Hr(bb*Zp,p2,p1)/(p2**2 - p1**2) # blows up at p1=p2
 		integrand = smoothMatrix(integrand)
 
-		# plt.ioff()
-		# plt.figure()
-		# plt.imshow((abs(integrand/Zp2)))
-		# plt.colorbar()
-		# plt.show()
-		# exit()
-
-
-
 		dd = 1/(4*w*mu*P) * abs(Bc(p))/Bc(p) * np.trapz(integrand/Zp2, x=p, axis=0)
 
 		# if returnMode and i == returnItr:
@@ -536,7 +527,7 @@ def SolveForCoefficients(kd,n,incident_mode=0,pol='TE',polarity='even',
 	Loop completed. Perform Error tests
 	'''
 
-	shouldBeOne = 1/(4*w*mu*P) * np.trapz(bb*abs(Bc(p))*(B[m]+Bc(p))*G(m,p), x=p)
+	shouldBeOne = 1/(4*w*mu*P) * np.trapz(bb/Zp*(B[m]+Bc(p))*G(m,p), x=p)
 
 	'''
 	Output results
@@ -551,8 +542,9 @@ def SolveForCoefficients(kd,n,incident_mode=0,pol='TE',polarity='even',
 
 	plt.ioff()
 	plt.figure()
-	plt.plot(p/k,np.real(bb*Z(0)),'r')
-	plt.plot(p/k,np.imag(bb*Z(0)),'b')
+	plt.plot(p/k,np.real(bb*Z(0)),'ro')
+	plt.plot(p/k,np.imag(bb*Z(0)),'bo')
+	plt.xlim(0,3)
 	plt.show()
 	exit()
 
@@ -622,13 +614,13 @@ def main():
 
 	n = sqrt(20)
 
-	res = 800
+	res = 200
 	incident_mode = 0
 	pol='TE'
 	polarity = 'even'
 
 	imax = 200
-	p_max = 15
+	p_max = 50
 
 	plt.ion()
 	
@@ -703,10 +695,10 @@ fix error for int type kds
 
 if __name__ == '__main__':
   ### MAIN FUNCTIONS ###
-  main()	
+  # main()	
 	# PrettyPlots()
 
 	### TEST FUNCTIONS ###
-  # test_beta_marcuse()
+  test_beta_marcuse()
   # convergence_test_single()
 	# TestHarness()

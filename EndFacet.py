@@ -441,11 +441,12 @@ def SolveForCoefficients(kd,n,incident_mode=0,pol='TE',polarity='even',
 	# Define mesh of p values
 	pmax = p_max*k
 	pres = p_res
-	p = np.linspace(1e-3,pmax,pres)
+	# p = np.linspace(1e-3,pmax,pres)
 	
-	# p_nearSingularity = np.linspace(1e-3,2*k,p_res)
-	# p_toMax = np.linspace(2*k,pmax,200)
-	# p = np.hstack((p_nearSingularity[:-1],p_toMax))
+	p_nearSingularity = np.linspace(1e-3,2*k,3*p_res)
+	p_toMax = np.linspace(2*k,pmax,200)
+	p = np.hstack((p_nearSingularity[:-1],p_toMax))
+
 
 	'''
 	2D mesh of p values for performing integration with matrices. Rows correspond to
@@ -457,6 +458,10 @@ def SolveForCoefficients(kd,n,incident_mode=0,pol='TE',polarity='even',
 	a row vector representing a function of p.
 	'''
 	p2,p1 = np.meshgrid(p,p)
+
+	Zp = Z(p)
+	Zp2 = Z(p2)
+
 
 	# Define initial states for an, qr
 	a = np.zeros(N, dtype=complex)
@@ -477,23 +482,32 @@ def SolveForCoefficients(kd,n,incident_mode=0,pol='TE',polarity='even',
 
 		# TODO - process the lead terms before looping, since they are independent of the iteration
 		
-		integrand = Ht(dd*Z(p),p1,p2)/(p1**2 - p2**2) 	# blows up at p1=p2
-		integrand = smoothMatrix(integrand)				# elminate singular points by using average of nearest neighbors.
+		integrand = Ht(dd*Zp,p1,p2)/(p1**2 - p2**2) 	# blows up at p1=p2
+		integrand = smoothMatrix(integrand)				# elminate singular points by using average of nearest neighbors.		
 
 		bb = 1/(2*w*mu*P) * abs(Bc(p))/(B[m]+Bc(p)) * ( \
-			2*B[m]*G(m,p) /Z(p) \
-			+ np.sum([  (B[m]-B[j])*a[j]*G(j,p) for j in range(N) ], axis=0)/Z(p) \
-			+ np.trapz(integrand/Z(p2), x=p, axis=0) /Z(p) \
+			2*B[m]*G(m,p) /Zp \
+			+ np.sum([  (B[m]-B[j])*a[j]*G(j,p) for j in range(N) ], axis=0)/Zp \
+			+ np.trapz(integrand/Zp2, x=p, axis=0) /Zp \
 			+ dd * (B[m]-Bc(p)) * pi * Bt(p)*Br(p)*2*np.real(Dr(p))
 			)
 
 		a_prev = a
-		a = [1/(4*w*mu*P) * np.trapz(bb*Z(p) * (B[j]-Bc(p)) * G(j,p).conj(), x=p) for j in range(N)]; a = np.array(a);
+		a = [1/(4*w*mu*P) * np.trapz(bb*Zp * (B[j]-Bc(p)) * G(j,p).conj(), x=p) for j in range(N)]; a = np.array(a);
 
-		integrand = Hr(bb*Z(p),p2,p1)/(p2**2 - p1**2) # blows up at p1=p2
+		integrand = Hr(bb*Zp,p2,p1)/(p2**2 - p1**2) # blows up at p1=p2
 		integrand = smoothMatrix(integrand)
 
-		dd = 1/(4*w*mu*P) * abs(Bc(p))/Bc(p) * np.trapz(integrand/Z(p2), x=p, axis=0)
+		plt.ioff()
+		plt.figure()
+		plt.imshow(np.log10(abs(integrand)))
+		plt.colorbar()
+		plt.show()
+		exit()
+
+
+
+		dd = 1/(4*w*mu*P) * abs(Bc(p))/Bc(p) * np.trapz(integrand/Zp2, x=p, axis=0)
 
 		# if returnMode and i == returnItr:
 		# 	# bail and return whatever value we're testing
@@ -537,8 +551,8 @@ def SolveForCoefficients(kd,n,incident_mode=0,pol='TE',polarity='even',
 
 	plt.ioff()
 	plt.figure()
-	plt.plot(p,bb*Z(0),'r')
-	plt.plot(p,dd*Z(0),'b')
+	plt.plot(p/k,np.real(dd*Z(0)),'r')
+	plt.plot(p/k,np.imag(dd*Z(0)),'b')
 	plt.show()
 	exit()
 
@@ -608,7 +622,7 @@ def main():
 
 	n = sqrt(20)
 
-	res = 600
+	res = 200
 	incident_mode = 0
 	pol='TE'
 	polarity = 'even'

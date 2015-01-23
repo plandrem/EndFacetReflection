@@ -441,11 +441,11 @@ def SolveForCoefficients(kd,n,incident_mode=0,pol='TE',polarity='even',
 	# Define mesh of p values
 	pmax = p_max*k
 	pres = p_res
-	# p = np.linspace(1e-3,pmax,pres)
+	p = np.linspace(1e-3,pmax,pres)
 	
-	p_nearSingularity = np.linspace(1e-3,2*k,3*p_res)
-	p_toMax = np.linspace(2*k,pmax,200)
-	p = np.hstack((p_nearSingularity[:-1],p_toMax))
+	# p_nearSingularity = np.linspace(1e-3,2*k,3*p_res)
+	# p_toMax = np.linspace(2*k,pmax,200)
+	# p = np.hstack((p_nearSingularity[:-1],p_toMax))
 
 
 	'''
@@ -488,7 +488,7 @@ def SolveForCoefficients(kd,n,incident_mode=0,pol='TE',polarity='even',
 		bb = 1/(2*w*mu*P) * abs(Bc(p))/(B[m]+Bc(p)) * ( \
 			2*B[m]*G(m,p) /Zp \
 			+ np.sum([  (B[m]-B[j])*a[j]*G(j,p) for j in range(N) ], axis=0)/Zp \
-			+ np.trapz(integrand/Zp2, x=p, axis=0) /Zp \
+			+ np.trapz(integrand/Zp2, x=p, axis=0) \
 			+ dd * (B[m]-Bc(p)) * pi * Bt(p)*Br(p)*2*np.real(Dr(p))
 			)
 
@@ -498,12 +498,12 @@ def SolveForCoefficients(kd,n,incident_mode=0,pol='TE',polarity='even',
 		integrand = Hr(bb*Zp,p2,p1)/(p2**2 - p1**2) # blows up at p1=p2
 		integrand = smoothMatrix(integrand)
 
-		plt.ioff()
-		plt.figure()
-		plt.imshow(np.log10(abs(integrand)))
-		plt.colorbar()
-		plt.show()
-		exit()
+		# plt.ioff()
+		# plt.figure()
+		# plt.imshow((abs(integrand/Zp2)))
+		# plt.colorbar()
+		# plt.show()
+		# exit()
 
 
 
@@ -551,8 +551,8 @@ def SolveForCoefficients(kd,n,incident_mode=0,pol='TE',polarity='even',
 
 	plt.ioff()
 	plt.figure()
-	plt.plot(p/k,np.real(dd*Z(0)),'r')
-	plt.plot(p/k,np.imag(dd*Z(0)),'b')
+	plt.plot(p/k,np.real(bb*Z(0)),'r')
+	plt.plot(p/k,np.imag(bb*Z(0)),'b')
 	plt.show()
 	exit()
 
@@ -622,13 +622,13 @@ def main():
 
 	n = sqrt(20)
 
-	res = 200
+	res = 800
 	incident_mode = 0
 	pol='TE'
 	polarity = 'even'
 
 	imax = 200
-	p_max = 50
+	p_max = 15
 
 	plt.ion()
 	

@@ -89,122 +89,163 @@ def numModes(ncore,nclad,kd, polarity='even'):
 	C = 0 if polarity=='even' else pi/2.
 	return np.ceil((sqrt(ncore**2 - nclad**2)*kd - C) / pi).astype(int)
 
-def beta_marcuse(n,d,wl=1.,pol='TM',polarity='even',Nmodes=None,plot=False):
 
-	'''
-	Based on theory in Marcuse, 1970 "Radiation Losses in Tapered Dielectric Waveguides"
+# def beta_marcuse(n,d,wl=1.,pol='TM',polarity='even',Nmodes=None,plot=False):
 
-	Computes beta for dielectric slab in air (can be modified for asymmetric slab)
+# 	'''
+# 	Based on theory in Marcuse, 1970 "Radiation Losses in Tapered Dielectric Waveguides"
 
-	Returns array (length Nmodes) of wavevectors - if fewer than Nmodes exist, array is padded 
-	with np.nan
+# 	Computes beta for dielectric slab in air (can be modified for asymmetric slab)
 
-	0th index result corresponds to fundamental
+# 	Returns array (length Nmodes) of wavevectors - if fewer than Nmodes exist, array is padded 
+# 	with np.nan
 
-	Currently only valid for even modes!
+# 	0th index result corresponds to fundamental
 
-	INPUTS:
-	n - index of slab
-	d - half-thickness of slab
+# 	Currently only valid for even modes!
 
-	'''
-	# # Use to force plot/exit when debugging
-	# plot=True
+# 	INPUTS:
+# 	n - index of slab
+# 	d - half-thickness of slab
 
-	even = (polarity=='even')
+# 	'''
+# 	# # Use to force plot/exit when debugging
+# 	# plot=True
 
-	k = 2*pi/wl
-	gamma = lambda x: sqrt((n*k)**2 - x**2 - k**2)
+# 	even = (polarity=='even')
+
+# 	k = 2*pi/wl
+# 	gamma = lambda x: sqrt((n*k)**2 - x**2 - k**2)
 	
 
-	# Define the transcendental function for the allowed transverse wavevectors. Note that this is a complex function
-	# but we only need to look for zeros on the real axis as long as our refractive index is purely real.
-	C = n**2 if pol == 'TM' else 1.
+# 	# Define the transcendental function for the allowed transverse wavevectors. Note that this is a complex function
+# 	# but we only need to look for zeros on the real axis as long as our refractive index is purely real.
+# 	C = n**2 if pol == 'TM' else 1.
 
-	if even:
-		trans = lambda K: np.real( tan(K * d) - C   * (gamma(K)/K) )
-	else:
-		trans = lambda K: np.real( tan(K * d) + 1/C * (K/gamma(K)) )
-
-
-	# Find zero crossings, then use the brentq method to find the precise zero crossing 
-	# between the two nearest points in the array
-
-	Ks = np.array([])
-
-	# set markers for the k values where tan(kd) becomes discontinuous:
-	# ie. kd = (n + 1/2)*pi
-	N = numModes(n,1,k*d,polarity=polarity)				# this is the maximum number of modes the system supports
-	bounds = [(_n+0.5)*pi/d for _n in range(N)]
-	bounds.insert(0,0)
-	bounds_eps = 1e-9														# we need some infinitesimal spacer to avoid evaluating the function at the discontinuity
-
-	for j in range(N):
-
-		k_low = bounds[j]+bounds_eps
-		k_high = bounds[j+1]-bounds_eps
-
-		try:
-			k_zeroCrossing = sp.optimize.brentq(trans,k_low,k_high)
-		except ValueError:
-			print "BrentQ error:"
-			print k_low, k_high
-			print trans(k_low), trans(k_high)
-			k_zeroCrossing = np.nan
-			plot=True
-
-		Ks = np.append(Ks,k_zeroCrossing)
-
-	# Done finding zero crossings for transcendental function.
+# 	if even:
+# 		trans = lambda K: np.real( tan(K * d) - C   * (gamma(K)/K) )
+# 	else:
+# 		trans = lambda K: np.real( tan(K * d) + 1/C * (K/gamma(K)) )
 
 
+# 	# Find zero crossings, then use the brentq method to find the precise zero crossing 
+# 	# between the two nearest points in the array
+
+# 	Ks = np.array([])
+
+# 	# set markers for the k values where tan(kd) becomes discontinuous:
+# 	# ie. kd = (n + 1/2)*pi
+# 	N = numModes(n,1,k*d,polarity=polarity)				# this is the maximum number of modes the system supports
+# 	bounds = [(_n+0.5)*pi/d for _n in range(N)]
+# 	bounds.insert(0,0)
+# 	bounds_eps = 1e-9														# we need some infinitesimal spacer to avoid evaluating the function at the discontinuity
+
+# 	for j in range(N):
+
+# 		k_low = bounds[j]+bounds_eps
+# 		k_high = bounds[j+1]-bounds_eps
+
+# 		try:
+# 			k_zeroCrossing = sp.optimize.brentq(trans,k_low,k_high)
+# 		except ValueError:
+# 			print "BrentQ error:"
+# 			print k_low, k_high
+# 			print trans(k_low), trans(k_high)
+# 			k_zeroCrossing = np.nan
+# 			plot=True
+
+# 		Ks = np.append(Ks,k_zeroCrossing)
+
+# 	# Done finding zero crossings for transcendental function.
 
 
-	# Convert from transverse wavevector to propagation constant, Beta
-	Bs = sqrt((n*k)**2 - Ks**2)
 
-	# Truncate or pad output as necessary
-	if len(Bs) < Nmodes:
-		pad = np.zeros(Nmodes - len(Bs)) * np.nan
-		Bs = np.hstack((Bs,pad))
+
+# 	# Convert from transverse wavevector to propagation constant, Beta
+# 	Bs = sqrt((n*k)**2 - Ks**2)
+
+# 	# Truncate or pad output as necessary
+# 	if len(Bs) < Nmodes:
+# 		pad = np.zeros(Nmodes - len(Bs)) * np.nan
+# 		Bs = np.hstack((Bs,pad))
 		
-	elif len(Bs) > Nmodes:
-		Bs = Bs[:Nmodes] 
+# 	elif len(Bs) > Nmodes:
+# 		Bs = Bs[:Nmodes] 
 
-	# Plots for debugging
-	if plot:
+# 	# Plots for debugging
+# 	if plot:
 
-		plt.ioff()
+# 		plt.ioff()
 
-		kappa = np.linspace(0,bounds[-1]-bounds_eps,10000)
+# 		kappa = np.linspace(0,bounds[-1]-bounds_eps,10000)
 
-		# print 'Number of modes:', Nmodes
-		print Ks*d/pi
-		# print 'Zero Crossings:', kappa[np.nonzero(diff)[0]] * d/pi
+# 		# print 'Number of modes:', Nmodes
+# 		print Ks*d/pi
+# 		# print 'Zero Crossings:', kappa[np.nonzero(diff)[0]] * d/pi
 
-		plt.figure()
+# 		plt.figure()
 
-		plt.plot(kappa*d/pi, tan(kappa*d),'b')
+# 		plt.plot(kappa*d/pi, tan(kappa*d),'b')
 
-		if even:
-			plt.plot(kappa*d/pi, C * sqrt(n**2*k**2 - kappa**2 - k**2)/kappa,'g')
-		else:
-			plt.plot(kappa*d/pi, 1/C * (-kappa)/gamma(kappa).real,'g')
-			# plt.plot(kappa*d/pi, 1/C * (-kappa)/sqrt(n**2*k**2 - kappa**2 - k**2))
+# 		if even:
+# 			plt.plot(kappa*d/pi, C * sqrt(n**2*k**2 - kappa**2 - k**2)/kappa,'g')
+# 		else:
+# 			plt.plot(kappa*d/pi, 1/C * (-kappa)/gamma(kappa).real,'g')
+# 			# plt.plot(kappa*d/pi, 1/C * (-kappa)/sqrt(n**2*k**2 - kappa**2 - k**2))
 
-		plt.plot(kappa*d/pi, trans(kappa),'r')
-		plt.plot(kappa*d/pi, np.sign(trans(kappa)), 'k:')
+# 		plt.plot(kappa*d/pi, trans(kappa),'r')
+# 		plt.plot(kappa*d/pi, np.sign(trans(kappa)), 'k:')
 
-		# for j in range(N):
-		# 	plt.axvline(Ks[j]*d/pi)
+# 		# for j in range(N):
+# 		# 	plt.axvline(Ks[j]*d/pi)
 
-		plt.xlabel(r'$\kappa d/\pi$')
-		plt.axhline(0, c='k')
-		plt.ylim(-5,5)
-		plt.show()
-		exit()
+# 		plt.xlabel(r'$\kappa d/\pi$')
+# 		plt.axhline(0, c='k')
+# 		plt.ylim(-5,5)
+# 		plt.show()
+# 		exit()
 
-	return np.array(Bs)
+# 	return np.array(Bs)
+
+def beta_marcuse(n,d,wl=1.,pol='TM',polarity='even',Nmodes=None, plot=False):
+    even = (polarity=='even')
+    k = 2*pi/wl
+    kappa = np.linspace(0,n*k,10000)
+    gamma = lambda x: sqrt((n*k)**2 - x**2 - k**2)
+    C = n**2 if pol == 'TM' else 1.
+    if even:
+        trans = lambda K: (K*tan(K * d) - C * gamma(K)).real
+    else:
+        trans = lambda K: (gamma(K)*tan(K * d) + 1/C * K).real
+    diff = np.diff(np.sign(trans(kappa)))
+    Ks = np.array([])
+    toggle = True
+    for i,idx in enumerate(np.nonzero(diff)[0]):
+        if toggle and abs(diff[idx])==2:
+            k_low = kappa[idx-1]
+            k_high = kappa[idx+1]
+            try:
+                Ks = np.append(Ks, sp.optimize.brentq(trans,k_low,k_high))
+            except:
+                print 'BrentQ Failed...'
+        toggle = not toggle
+    Ks_cor = [];
+    for ke in Ks:
+        if even:
+            err = tan(ke * d) - C * gamma(ke)/ke
+        else:
+            err = tan(ke * d) + 1/C * ke/gamma(ke)
+        if abs(err) < 1e-9:
+            Ks_cor.append(ke)
+    Ks = np.array(Ks_cor);
+    Bs = sqrt((n*k)**2 - Ks**2)
+    # Truncate or pad output as necessary
+    if len(Bs) < Nmodes:
+        pad = np.zeros(Nmodes - len(Bs)) * np.nan
+        Bs = np.hstack((Bs,pad))
+    elif len(Bs) > Nmodes:
+        Bs = Bs[:Nmodes]
+    return Bs
 
 def test_beta_marcuse():
 
@@ -395,17 +436,25 @@ def SolveForCoefficients(kd,n,incident_mode=0,pol='TE',polarity='even',
 	N = numModes(n,1,kd)
 	B = beta_marcuse(n,d,wl=wl,pol='TE',polarity='even',Nmodes=N,plot=False)
 
+	print "N:", N
+	print "Betas:", B
+
 	# Define Wavevectors
 	g  = sqrt(      -k**2 + B**2)						# transverse wavevectors in air for guided modes
 	K  = sqrt(n**2 * k**2 - B**2)						# transverse wavevectors in high-index region for guided modes
 
-	Bc = lambda p: sqrt(k**2 - p**2)
-	o  = lambda p: sqrt((n*k)**2 - Bc(p)**2)
+	# Hamid's functions
+	betac_old = lambda rho: sqrt(k**2 - rho**2)
+	Bc = lambda rho: betac_old(rho)*(2 * (betac_old(rho).real > 0) - 1)
+	o  = lambda rho: sqrt((n*k)**2 - Bc(rho)**2)
+	
+	# Bc = lambda p: sqrt(k**2 - p**2)
+	# o  = lambda p: sqrt((n*k)**2 - Bc(p)**2)
 
 	# Mode Amplitude Coefficients
 	P = 1
 
-	A = sqrt(2*w*mu*P / (B*d + B/g)) # Tested for both even and odd
+	A = sqrt(2*w*mu*P / (B*d + B/g))
 
 	Bt = lambda p: sqrt(2*w*mu*P / (pi*abs(Bc(p))))
 	Br = lambda p: sqrt(2*p**2*w*mu*P / (pi*abs(Bc(p))*(p**2*cos(o(p)*d)**2 + o(p)**2*sin(o(p)*d)**2)))
@@ -429,17 +478,17 @@ def SolveForCoefficients(kd,n,incident_mode=0,pol='TE',polarity='even',
 
 		qt = np.tile(qt,(len(qr),1)).transpose()
 
-		return -qt * (Bc(b) - Bc(a)) * k**2 * (eps-1) * Bt(b).conj() * Br(a).conj() * (  sin( (o(a)+b) *d)/(o(a)+b)  +  sin( (o(a)-b) *d)/(o(a)-b)  )
+		return qt * (Bc(b) - Bc(a)) * k**2 * (eps-1) * Bt(b).conj() * Br(a).conj() * (  sin( (o(a)+b) *d)/(o(a)+b)  +  sin( (o(a)-b) *d)/(o(a)-b)  )
 
 
 	# Define mesh of p values
 	pmax = p_max*k
 	pres = p_res
-	# p = np.linspace(1e-3,pmax,pres)
+	p = np.linspace(1e-9,pmax,pres)
 	
-	p_nearSingularity = np.linspace(1e-3,2*k,p_res)
-	p_toMax = np.linspace(2*k,pmax,200)
-	p = np.hstack((p_nearSingularity[:-1],p_toMax))
+	# p_nearSingularity = np.linspace(1e-3,2*k,p_res)
+	# p_toMax = np.linspace(2*k,pmax,200)
+	# p = np.hstack((p_nearSingularity[:-1],p_toMax))
 
 	'''
 	2D mesh of p values for performing integration with matrices. Rows correspond to
@@ -589,12 +638,12 @@ def main():
 
 	# Note: If kd is too small, BrentQ will fail to converge.
 	# kds = np.linspace(0.6,2.4,100)
-	# kds = np.linspace(0.1,0.5,50)
-	kds = np.linspace(1e-2,3,200)
+	kds = np.linspace(0.7,.8,10)
+	# kds = np.linspace(1e-2,3,200)
 
-	n = 4
+	n = sqrt(20)
 
-	res = 200
+	res = 400
 	incident_mode = 0
 	pol='TE'
 	polarity = 'even'

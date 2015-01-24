@@ -293,7 +293,7 @@ def convergence_test_single():
 	For a specific value of kd, sweep pmax and pres and plot the result
 	'''
 
-	kd = 0.15
+	kd = 2.8
 
 	n = sqrt(20)
 
@@ -304,7 +304,7 @@ def convergence_test_single():
 	pol='TE'
 	polarity = 'even'
 
-	imax = 50
+	imax = 200
 
 	plt.ion()
 
@@ -399,7 +399,7 @@ def SolveForCoefficients(kd,n,incident_mode=0,pol='TE',polarity='even',
 	g  = sqrt(      -k**2 + B**2)						# transverse wavevectors in air for guided modes
 	K  = sqrt(n**2 * k**2 - B**2)						# transverse wavevectors in high-index region for guided modes
 
-	Bc = lambda p: sqrt(k**2 - p**2)
+	Bc = lambda p: sqrt(k**2 - p**2) * (2 * (sqrt(k**2 - p**2).real > 0) - 1) # Second term is Hamid's correction - not sure why this is necessary yet
 	o  = lambda p: sqrt((n*k)**2 - Bc(p)**2)
 
 	# Mode Amplitude Coefficients
@@ -435,17 +435,17 @@ def SolveForCoefficients(kd,n,incident_mode=0,pol='TE',polarity='even',
 
 		qt = np.tile(qt,(len(qt),1)).transpose()
 
-		return -qt * (Bc(p2) - Bc(p1)) * k**2 * (eps-1) * Bt(p2).conj() * Br(p1).conj() * (  sin( (o(p1)+p2) *d)/(o(p1)+p2)  +  sin( (o(p1)-p2) *d)/(o(p1)-p2)  )
+		return qt * (Bc(p2) - Bc(p1)) * k**2 * (eps-1) * Bt(p2).conj() * Br(p1).conj() * (  sin( (o(p1)+p2) *d)/(o(p1)+p2)  +  sin( (o(p1)-p2) *d)/(o(p1)-p2)  )
 
 
 	# Define mesh of p values
 	pmax = p_max*k
 	pres = p_res
-	# p = np.linspace(1e-3,pmax,pres)
+	p = np.linspace(1e-3,pmax,pres)
 	
-	p_nearSingularity = np.linspace(1e-3,2*k,3*p_res)
-	p_toMax = np.linspace(2*k,pmax,200)
-	p = np.hstack((p_nearSingularity[:-1],p_toMax))
+	# p_nearSingularity = np.linspace(1e-3,3*k,3*p_res)
+	# p_toMax = np.linspace(3*k,pmax,200)
+	# p = np.hstack((p_nearSingularity[:-1],p_toMax))
 
 
 	'''
@@ -498,6 +498,13 @@ def SolveForCoefficients(kd,n,incident_mode=0,pol='TE',polarity='even',
 		integrand = Hr(bb*Zp,p2,p1)/(p2**2 - p1**2) # blows up at p1=p2
 		integrand = smoothMatrix(integrand)
 
+		# plt.ioff()
+		# plt.figure()
+		# plt.imshow(abs(integrand))
+		# plt.colorbar()
+		# plt.show()
+		# exit()
+
 		dd = 1/(4*w*mu*P) * abs(Bc(p))/Bc(p) * np.trapz(integrand/Zp2, x=p, axis=0)
 
 		# if returnMode and i == returnItr:
@@ -527,7 +534,7 @@ def SolveForCoefficients(kd,n,incident_mode=0,pol='TE',polarity='even',
 	Loop completed. Perform Error tests
 	'''
 
-	shouldBeOne = 1/(4*w*mu*P) * np.trapz(bb/Zp*(B[m]+Bc(p))*G(m,p), x=p)
+	shouldBeOne = 1/(4*w*mu*P) * np.trapz(bb*Zp*(B[m]+Bc(p))*G(m,p), x=p)
 
 	'''
 	Output results
@@ -540,13 +547,13 @@ def SolveForCoefficients(kd,n,incident_mode=0,pol='TE',polarity='even',
 		print 'shouldBeOne:', shouldBeOne
 
 
-	plt.ioff()
-	plt.figure()
-	plt.plot(p/k,np.real(bb*Z(0)),'ro')
-	plt.plot(p/k,np.imag(bb*Z(0)),'bo')
-	plt.xlim(0,3)
-	plt.show()
-	exit()
+	# plt.ioff()
+	# plt.figure()
+	# plt.plot(p/k,np.real(bb*Z(0)),'ro')
+	# plt.plot(p/k,np.imag(bb*Z(0)),'bo')
+	# # plt.xlim(0,3)
+	# plt.show()
+	# exit()
 
 	if converged:
 		return a, np.array(shouldBeOne)
@@ -599,7 +606,8 @@ def main():
 
 	# Define Key Simulation Parameters
 	
-	kds = np.array([0.628])
+	kds = np.array([2.8])
+	# kds = np.array([0.628])
 	
 	# kds = np.array([0.209,0.418,0.628,0.837,1.04,1.25]) # TE Reference values
 	# kds = np.array([0.314,0.418,0.628,0.837,1.04,1.25]) # TM Reference Values
@@ -608,19 +616,18 @@ def main():
 	# kd = d*pi/n
 
 	# Note: If kd is too small, BrentQ will fail to converge.
-	# kds = np.linspace(0.6,2.4,100)
-	# kds = np.linspace(0.1,0.5,50)
-	# kds = np.linspace(1e-2,3,50)
+	# kds = np.linspace(1e-2,3,100)
+	# kds = np.linspace(2.7,2.9,100)
 
 	n = sqrt(20)
 
-	res = 200
+	res = 1000
 	incident_mode = 0
 	pol='TE'
 	polarity = 'even'
 
 	imax = 200
-	p_max = 50
+	p_max = 15
 
 	plt.ion()
 	
@@ -699,6 +706,6 @@ if __name__ == '__main__':
 	# PrettyPlots()
 
 	### TEST FUNCTIONS ###
-  test_beta_marcuse()
-  # convergence_test_single()
+  # test_beta_marcuse()
+  convergence_test_single()
 	# TestHarness()

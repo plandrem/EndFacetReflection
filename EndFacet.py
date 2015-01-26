@@ -374,7 +374,8 @@ def convergence_test_single():
 	plt.show()
 
 def SolveForCoefficients(kd,n,incident_mode=0,pol='TE',polarity='even',
-	p_max=20,p_res=1e3,imax=100,convergence_threshold=1e-5,first_order=False, debug=False, returnMode = None, returnItr = 0):
+	p_max=20,p_res=1e3,imax=100,convergence_threshold=1e-5,first_order=False, debug=False, returnMode = None, returnItr = 0,
+	initial_a=None, initial_d=None):
 
 	'''
 	Major code refactor for cleanliness. TE even modes only.
@@ -464,8 +465,19 @@ def SolveForCoefficients(kd,n,incident_mode=0,pol='TE',polarity='even',
 
 
 	# Define initial states for an, qr
-	a = np.zeros(N, dtype=complex)
-	dd = np.zeros(len(p), dtype=complex)
+	if initial_a:
+		a = initial_a
+		if len(a) < N:
+			# pad with zeros
+			for _n in range(N-len(a)):
+				a.append(0)
+	else:
+		a = np.zeros(N, dtype=complex)
+
+	if initial_d:
+		dd = initial_d
+	else:
+		dd = np.zeros(len(p), dtype=complex)
 
 	'''
 	Iteratively define qt,a,qr until the value of a converges to within some threshold.
@@ -606,7 +618,7 @@ def main():
 
 	# Define Key Simulation Parameters
 	
-	kds = np.array([2.8])
+	# kds = np.array([2.8])
 	# kds = np.array([0.628])
 	
 	# kds = np.array([0.209,0.418,0.628,0.837,1.04,1.25]) # TE Reference values
@@ -617,11 +629,11 @@ def main():
 
 	# Note: If kd is too small, BrentQ will fail to converge.
 	# kds = np.linspace(1e-2,3,100)
-	# kds = np.linspace(2.7,2.9,100)
+	kds = np.linspace(2.7,2.9,100)
 
 	n = sqrt(20)
 
-	res = 1000
+	res = 400
 	incident_mode = 0
 	pol='TE'
 	polarity = 'even'
@@ -702,10 +714,10 @@ fix error for int type kds
 
 if __name__ == '__main__':
   ### MAIN FUNCTIONS ###
-  # main()	
+  main()	
 	# PrettyPlots()
 
 	### TEST FUNCTIONS ###
   # test_beta_marcuse()
-  convergence_test_single()
+  # convergence_test_single()
 	# TestHarness()

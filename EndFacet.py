@@ -293,7 +293,7 @@ def convergence_test_single():
 	For a specific value of kd, sweep pmax and pres and plot the result
 	'''
 
-	kd = 2.8
+	kd = 2.
 
 	n = sqrt(20)
 
@@ -336,7 +336,7 @@ def convergence_test_single():
 	for i,res_i in enumerate(res):
 		for j,pmax_j in enumerate(p_max):
 
-			a, acc = SolveForCoefficients(kd,n,
+			a,dd,bb,acc = SolveForCoefficients(kd,n,
 													pol=pol,
 													polarity=polarity,
 													incident_mode=incident_mode,
@@ -395,6 +395,11 @@ def SolveForCoefficients(kd,n,incident_mode=0,pol='TE',polarity='even',
 	# Solve slab for all modes
 	N = numModes(n,1,kd)
 	B = beta_marcuse(n,d,wl=wl,pol='TE',polarity='even',Nmodes=N,plot=False)
+
+	# Make sure the source mode is supported by the current slab
+	if m >= N:
+		print "Mode %u not supported by slab at frequency kd = %.3f" % (m, kd)
+		return np.ones(N) * np.nan, np.ones(N)*np.nan, np.ones(N)*np.nan, np.array(np.nan)
 
 	# Define Wavevectors
 	g  = sqrt(      -k**2 + B**2)						# transverse wavevectors in air for guided modes
@@ -465,19 +470,29 @@ def SolveForCoefficients(kd,n,incident_mode=0,pol='TE',polarity='even',
 
 
 	# Define initial states for an, qr
-	if initial_a:
-		a = initial_a
-		if len(a) < N:
-			# pad with zeros
-			for _n in range(N-len(a)):
-				a.append(0)
+	if initial_a != None:
+		if initial_a.any() == np.nan:
+			# previous iteration failed; start from scratch
+			a = np.zeros(N, dtype=complex)
+		else:
+			a = initial_a
+			if len(a) < N:
+				# pad with zeros
+				for _n in range(N-len(a)):
+					a = np.append(a,0)
 	else:
 		a = np.zeros(N, dtype=complex)
 
-	if initial_d:
-		dd = initial_d
+	if initial_d != None:
+		if initial_a.any() == np.nan:
+			# previous iteration failed; start from scratch
+			dd = np.zeros(len(p), dtype=complex)
+		else:
+			dd = initial_d
 	else:
 		dd = np.zeros(len(p), dtype=complex)
+
+
 
 	'''
 	Iteratively define qt,a,qr until the value of a converges to within some threshold.
@@ -510,14 +525,21 @@ def SolveForCoefficients(kd,n,incident_mode=0,pol='TE',polarity='even',
 		integrand = Hr(bb*Zp,p2,p1)/(p2**2 - p1**2) # blows up at p1=p2
 		integrand = smoothMatrix(integrand)
 
-		# plt.ioff()
-		# plt.figure()
-		# plt.imshow(abs(integrand))
-		# plt.colorbar()
-		# plt.show()
-		# exit()
-
 		dd = 1/(4*w*mu*P) * abs(Bc(p))/Bc(p) * np.trapz(integrand/Zp2, x=p, axis=0)
+
+		# if i==4:
+		# 	plt.ioff()
+		# 	plt.figure()
+		# 	plt.imshow(abs(integrand))
+		# 	plt.colorbar()
+
+		# 	plt.figure()
+		# 	plt.plot(p/k,bb.real, 'r-')
+		# 	plt.plot(p/k,bb.imag, 'r--')
+		# 	plt.plot(p/k,dd.real, 'b-')
+		# 	plt.plot(p/k,dd.imag, 'b--')
+		# 	plt.show()
+		# 	exit()
 
 		# if returnMode and i == returnItr:
 		# 	# bail and return whatever value we're testing
@@ -568,9 +590,9 @@ def SolveForCoefficients(kd,n,incident_mode=0,pol='TE',polarity='even',
 	# exit()
 
 	if converged:
-		return a, np.array(shouldBeOne)
+		return a, bb, dd, np.array(shouldBeOne)
 	else:
-		return a * np.nan, np.array(np.nan)
+		return a * np.nan, dd*np.nan, bb*np.nan, np.array(np.nan)
 
 def TestHarness():
 
@@ -614,11 +636,34 @@ def TestHarness():
 	plt.legend(res, loc='best')
 	plt.show()
 
+def test_betaMarcuseAtKd():
+
+	'''
+	use for testing mode solver at a specific frequency kd
+	'''
+
+	# constants
+	kd = 2.8
+	n = sqrt(20)
+
+	wl = 10. # Set to 10 to match Gelin values for qt
+	k = 2*pi/wl
+	d = kd/k
+	
+	# w = c*k
+	# eps = n**2
+
+	# Solve slab for all modes
+	N = numModes(n,1,kd)
+	print "Number of Modes from numModes: ", N
+	B = beta_marcuse(n,d,wl=wl,pol='TE',polarity='even',Nmodes=N,plot=True)
+
+
 def main():
 
 	# Define Key Simulation Parameters
 	
-	# kds = np.array([2.8])
+	# kds = np.array([2.7,2.8])
 	# kds = np.array([0.628])
 	
 	# kds = np.array([0.209,0.418,0.628,0.837,1.04,1.25]) # TE Reference values
@@ -628,13 +673,13 @@ def main():
 	# kd = d*pi/n
 
 	# Note: If kd is too small, BrentQ will fail to converge.
-	# kds = np.linspace(1e-2,3,100)
-	kds = np.linspace(2.7,2.9,100)
+	kds = np.linspace(1e-2,3,50)
+	# kds = np.linspace(2.7,2.9,100)
 
 	n = sqrt(20)
 
 	res = 400
-	incident_mode = 0
+	incident_mode = 1
 	pol='TE'
 	polarity = 'even'
 
@@ -653,11 +698,14 @@ def main():
 
 	method = SolveForCoefficients
 
+	last_a = None
+	last_d = None
+
 	for kdi,kd in enumerate(kds):
 
 		print '\nkd:', kd
 
-		a, acc = method(kd,n,
+		a,bb,dd,acc = method(kd,n,
 										pol=pol,
 										polarity=polarity,
 										incident_mode=incident_mode,
@@ -665,11 +713,16 @@ def main():
 										imax=imax,
 										p_max=p_max,
 										first_order=False,
-										debug=False
+										debug=False,
+										initial_a=last_a,
+										initial_d=last_d
 										)
 
 		ams.append(a)
 		accuracy.append(np.abs(acc))
+
+		# last_a = a
+		# last_d = dd
 
 		data = stackPoints(ams)
 		data = np.array(data)
@@ -714,10 +767,11 @@ fix error for int type kds
 
 if __name__ == '__main__':
   ### MAIN FUNCTIONS ###
-  main()	
+  # main()	
 	# PrettyPlots()
 
 	### TEST FUNCTIONS ###
   # test_beta_marcuse()
-  # convergence_test_single()
+  convergence_test_single()
 	# TestHarness()
+	# test_betaMarcuseAtKd()

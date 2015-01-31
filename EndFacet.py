@@ -334,7 +334,7 @@ def convergence_test_single():
 	For a specific value of kd, sweep pmax and pres and plot the result
 	'''
 
-	kd = 0.15
+	kd = 2.
 
 	n = sqrt(20)
 
@@ -345,7 +345,7 @@ def convergence_test_single():
 	pol='TE'
 	polarity = 'even'
 
-	imax = 50
+	imax = 200
 
 	plt.ion()
 
@@ -377,7 +377,7 @@ def convergence_test_single():
 	for i,res_i in enumerate(res):
 		for j,pmax_j in enumerate(p_max):
 
-			a, acc = SolveForCoefficients(kd,n,
+			a,dd,bb,acc = SolveForCoefficients(kd,n,
 													pol=pol,
 													polarity=polarity,
 													incident_mode=incident_mode,
@@ -415,7 +415,8 @@ def convergence_test_single():
 	plt.show()
 
 def SolveForCoefficients(kd,n,incident_mode=0,pol='TE',polarity='even',
-	p_max=20,p_res=1e3,imax=100,convergence_threshold=1e-5,first_order=False, debug=False, returnMode = None, returnItr = 0):
+	p_max=20,p_res=1e3,imax=100,convergence_threshold=1e-5,first_order=False, debug=False, returnMode = None, returnItr = 0,
+	initial_a=None, initial_d=None):
 
 	'''
 	Major code refactor for cleanliness. TE even modes only.
@@ -439,17 +440,17 @@ def SolveForCoefficients(kd,n,incident_mode=0,pol='TE',polarity='even',
 	print "N:", N
 	print "Betas:", B
 
+	# Make sure the source mode is supported by the current slab
+	if m >= N:
+		print "Mode %u not supported by slab at frequency kd = %.3f" % (m, kd)
+		return np.ones(N) * np.nan, np.ones(N)*np.nan, np.ones(N)*np.nan, np.array(np.nan)
+
 	# Define Wavevectors
 	g  = sqrt(      -k**2 + B**2)						# transverse wavevectors in air for guided modes
 	K  = sqrt(n**2 * k**2 - B**2)						# transverse wavevectors in high-index region for guided modes
 
-	# Hamid's functions
-	betac_old = lambda rho: sqrt(k**2 - rho**2)
-	Bc = lambda rho: betac_old(rho)*(2 * (betac_old(rho).real > 0) - 1)
-	o  = lambda rho: sqrt((n*k)**2 - Bc(rho)**2)
-	
-	# Bc = lambda p: sqrt(k**2 - p**2)
-	# o  = lambda p: sqrt((n*k)**2 - Bc(p)**2)
+	Bc = lambda p: sqrt(k**2 - p**2) * (2 * (sqrt(k**2 - p**2).real > 0) - 1) # Second term is Hamid's correction - not sure why this is necessary yet
+	o  = lambda p: sqrt((n*k)**2 - Bc(p)**2)
 
 	# Mode Amplitude Coefficients
 	P = 1
@@ -460,11 +461,17 @@ def SolveForCoefficients(kd,n,incident_mode=0,pol='TE',polarity='even',
 	Br = lambda p: sqrt(2*p**2*w*mu*P / (pi*abs(Bc(p))*(p**2*cos(o(p)*d)**2 + o(p)**2*sin(o(p)*d)**2)))
 	Dr = lambda p: 1/2. * exp(-1j*p*d) * (cos(o(p)*d) + 1j*o(p)/p * sin(o(p)*d))
 
+	def Z(p):
+		alpha = 1 if p <= k else 1j
+		return alpha * w * mu / abs(Bc(p))
+		# return abs(Bc(p))
+	Z = np.vectorize(Z,otypes=[np.complex])
+
 	# Define Helper functions for integrals
 
 	G = lambda m,p: 2 * k**2 * (eps-1) * A[m] * Bt(p) * cos(K[m]*d) * (g[m]*cos(p*d) - p*sin(p*d)) / ((K[m]**2 - p**2)*(g[m]**2 + p**2))
 
-	def Ht(qr,a,b):
+	def Ht(qr,p1,p2):
 
 		'''
 		qr is taken in as simply qr(p). To correspond to qr(p') in this 2D matrix formulation, it needs
@@ -472,18 +479,18 @@ def SolveForCoefficients(kd,n,incident_mode=0,pol='TE',polarity='even',
 		'''
 		qr = np.tile(qr,(len(qr),1)).transpose()
 
-		return -qr * (B[m] - Bc(a)) * k**2 * (eps-1) * Bt(b) * Br(a) * (  sin( (o(a)+b) *d)/(o(a)+b)  +  sin( (o(a)-b) *d)/(o(a)-b)  )
+		return -qr * (B[m] - Bc(p1)) * k**2 * (eps-1) * Bt(p2) * Br(p1) * (  sin( (o(p1)+p2) *d)/(o(p1)+p2)  +  sin( (o(p1)-p2) *d)/(o(p1)-p2)  )
 
-	def Hr(qt,a,b):
+	def Hr(qt,p1,p2):
 
-		qt = np.tile(qt,(len(qr),1)).transpose()
+		qt = np.tile(qt,(len(qt),1)).transpose()
 
-		return qt * (Bc(b) - Bc(a)) * k**2 * (eps-1) * Bt(b).conj() * Br(a).conj() * (  sin( (o(a)+b) *d)/(o(a)+b)  +  sin( (o(a)-b) *d)/(o(a)-b)  )
-
+		return qt * (Bc(p2) - Bc(p1)) * k**2 * (eps-1) * Bt(p2).conj() * Br(p1).conj() * (  sin( (o(p1)+p2) *d)/(o(p1)+p2)  +  sin( (o(p1)-p2) *d)/(o(p1)-p2)  )
 
 	# Define mesh of p values
 	pmax = p_max*k
 	pres = p_res
+
 	p = np.linspace(1e-9,pmax,pres)
 	
 	# p_nearSingularity = np.linspace(1e-3,2*k,p_res)
@@ -499,11 +506,36 @@ def SolveForCoefficients(kd,n,incident_mode=0,pol='TE',polarity='even',
 	Integrating over p' would then amount to summing over axis=0. This sums the rows of the matrix H, producing 
 	a row vector representing a function of p.
 	'''
-	p2,p1 = np.meshgrid(p,p) 
+	p2,p1 = np.meshgrid(p,p)
+
+	Zp = Z(p)
+	Zp2 = Z(p2)
+
 
 	# Define initial states for an, qr
-	a = np.zeros(N, dtype=complex)
-	qr = np.zeros(len(p), dtype=complex)
+	if initial_a != None:
+		if initial_a.any() == np.nan:
+			# previous iteration failed; start from scratch
+			a = np.zeros(N, dtype=complex)
+		else:
+			a = initial_a
+			if len(a) < N:
+				# pad with zeros
+				for _n in range(N-len(a)):
+					a = np.append(a,0)
+	else:
+		a = np.zeros(N, dtype=complex)
+
+	if initial_d != None:
+		if initial_a.any() == np.nan:
+			# previous iteration failed; start from scratch
+			dd = np.zeros(len(p), dtype=complex)
+		else:
+			dd = initial_d
+	else:
+		dd = np.zeros(len(p), dtype=complex)
+
+
 
 	'''
 	Iteratively define qt,a,qr until the value of a converges to within some threshold.
@@ -520,29 +552,43 @@ def SolveForCoefficients(kd,n,incident_mode=0,pol='TE',polarity='even',
 
 		# TODO - process the lead terms before looping, since they are independent of the iteration
 		
-		integrand = Ht(qr,p1,p2)/(p1**2 - p2**2) 	# blows up at p1=p2
-		integrand = smoothMatrix(integrand)				# elminate singular points by using average of nearest neighbors.
+		integrand = Ht(dd*Zp,p1,p2)/(p1**2 - p2**2) 	# blows up at p1=p2
+		integrand = smoothMatrix(integrand)				# elminate singular points by using average of nearest neighbors.		
 
-		qt = 1/(2*w*mu*P) * abs(Bc(p))/(B[m]+Bc(p)) * ( \
-			2*B[m]*G(m,p) \
-			+ np.sum([  (B[m]-B[j])*a[j]*G(j,p) for j in range(N) ], axis=0) \
-			+ np.trapz(integrand, x=p, axis=0) \
-			+ qr * (B[m]-Bc(p)) * pi * Bt(p)*Br(p)*2*np.real(Dr(p))
+		bb = 1/(2*w*mu*P) * abs(Bc(p))/(B[m]+Bc(p)) * ( \
+			2*B[m]*G(m,p) /Zp \
+			+ np.sum([  (B[m]-B[j])*a[j]*G(j,p) for j in range(N) ], axis=0)/Zp \
+			+ np.trapz(integrand/Zp2, x=p, axis=0) \
+			+ dd * (B[m]-Bc(p)) * pi * Bt(p)*Br(p)*2*np.real(Dr(p))
 			)
 
 		a_prev = a
-		a = [1/(4*w*mu*P) * np.trapz(qt * (B[j]-Bc(p)) * G(j,p), x=p) for j in range(N)]; a = np.array(a);
+		a = [1/(4*w*mu*P) * np.trapz(bb*Zp * (B[j]-Bc(p)) * G(j,p).conj(), x=p) for j in range(N)]; a = np.array(a);
 
-		integrand = Hr(qt,p2,p1)/(p2**2 - p1**2) # blows up at p1=p2
+		integrand = Hr(bb*Zp,p2,p1)/(p2**2 - p1**2) # blows up at p1=p2
 		integrand = smoothMatrix(integrand)
 
-		qr = 1/(4*w*mu*P) * abs(Bc(p))/Bc(p) * np.trapz(integrand, x=p, axis=0)
+		dd = 1/(4*w*mu*P) * abs(Bc(p))/Bc(p) * np.trapz(integrand/Zp2, x=p, axis=0)
 
-		if returnMode and i == returnItr:
-			# bail and return whatever value we're testing
-			if returnMode == 'qt': return (p,qt)
-			if returnMode == 'qr': return (p,qr)
-			if returnMode == 'a_integral': return (p,qt * (B[j]-Bc(p)) * G(j,p))
+		# if i==4:
+		# 	plt.ioff()
+		# 	plt.figure()
+		# 	plt.imshow(abs(integrand))
+		# 	plt.colorbar()
+
+		# 	plt.figure()
+		# 	plt.plot(p/k,bb.real, 'r-')
+		# 	plt.plot(p/k,bb.imag, 'r--')
+		# 	plt.plot(p/k,dd.real, 'b-')
+		# 	plt.plot(p/k,dd.imag, 'b--')
+		# 	plt.show()
+		# 	exit()
+
+		# if returnMode and i == returnItr:
+		# 	# bail and return whatever value we're testing
+		# 	if returnMode == 'qt': return (p,qt)
+		# 	if returnMode == 'qr': return (p,qr)
+		# 	if returnMode == 'a_integral': return (p,qt * (B[j]-Bc(p)) * G(j,p))
 
 
 		# Test for convergence
@@ -565,7 +611,7 @@ def SolveForCoefficients(kd,n,incident_mode=0,pol='TE',polarity='even',
 	Loop completed. Perform Error tests
 	'''
 
-	shouldBeOne = 1/(4*w*mu*P) * np.trapz(qt*(B[m]+Bc(p))*G(m,p), x=p)
+	shouldBeOne = 1/(4*w*mu*P) * np.trapz(bb*Zp*(B[m]+Bc(p))*G(m,p), x=p)
 
 	'''
 	Output results
@@ -577,10 +623,19 @@ def SolveForCoefficients(kd,n,incident_mode=0,pol='TE',polarity='even',
 		print '<a:', np.angle(a)
 		print 'shouldBeOne:', shouldBeOne
 
+
+	# plt.ioff()
+	# plt.figure()
+	# plt.plot(p/k,np.real(bb*Z(0)),'ro')
+	# plt.plot(p/k,np.imag(bb*Z(0)),'bo')
+	# # plt.xlim(0,3)
+	# plt.show()
+	# exit()
+
 	if converged:
-		return a, np.array(shouldBeOne)
+		return a, bb, dd, np.array(shouldBeOne)
 	else:
-		return a * np.nan, np.array(np.nan)
+		return a * np.nan, dd*np.nan, bb*np.nan, np.array(np.nan)
 
 def TestHarness():
 
@@ -624,11 +679,35 @@ def TestHarness():
 	plt.legend(res, loc='best')
 	plt.show()
 
+def test_betaMarcuseAtKd():
+
+	'''
+	use for testing mode solver at a specific frequency kd
+	'''
+
+	# constants
+	kd = 2.8
+	n = sqrt(20)
+
+	wl = 10. # Set to 10 to match Gelin values for qt
+	k = 2*pi/wl
+	d = kd/k
+	
+	# w = c*k
+	# eps = n**2
+
+	# Solve slab for all modes
+	N = numModes(n,1,kd)
+	print "Number of Modes from numModes: ", N
+	B = beta_marcuse(n,d,wl=wl,pol='TE',polarity='even',Nmodes=N,plot=True)
+
+
 def main():
 
 	# Define Key Simulation Parameters
 	
-	# kds = np.array([3.])
+	# kds = np.array([2.7,2.8])
+	# kds = np.array([0.628])
 	
 	# kds = np.array([0.209,0.418,0.628,0.837,1.04,1.25]) # TE Reference values
 	# kds = np.array([0.314,0.418,0.628,0.837,1.04,1.25]) # TM Reference Values
@@ -637,14 +716,13 @@ def main():
 	# kd = d*pi/n
 
 	# Note: If kd is too small, BrentQ will fail to converge.
-	# kds = np.linspace(0.6,2.4,100)
-	kds = np.linspace(0.7,.8,10)
-	# kds = np.linspace(1e-2,3,200)
+	kds = np.linspace(1e-2,3,50)
+	# kds = np.linspace(2.7,2.9,100)
 
 	n = sqrt(20)
 
 	res = 400
-	incident_mode = 0
+	incident_mode = 1
 	pol='TE'
 	polarity = 'even'
 
@@ -663,11 +741,14 @@ def main():
 
 	method = SolveForCoefficients
 
+	last_a = None
+	last_d = None
+
 	for kdi,kd in enumerate(kds):
 
 		print '\nkd:', kd
 
-		a, acc = method(kd,n,
+		a,bb,dd,acc = method(kd,n,
 										pol=pol,
 										polarity=polarity,
 										incident_mode=incident_mode,
@@ -675,11 +756,16 @@ def main():
 										imax=imax,
 										p_max=p_max,
 										first_order=False,
-										debug=False
+										debug=False,
+										initial_a=last_a,
+										initial_d=last_d
 										)
 
 		ams.append(a)
 		accuracy.append(np.abs(acc))
+
+		# last_a = a
+		# last_d = dd
 
 		data = stackPoints(ams)
 		data = np.array(data)
@@ -731,3 +817,4 @@ if __name__ == '__main__':
   # test_beta_marcuse()
   # convergence_test_single()
 	# TestHarness()
+	# test_betaMarcuseAtKd()

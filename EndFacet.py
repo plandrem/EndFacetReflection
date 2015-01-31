@@ -810,11 +810,11 @@ fix error for int type kds
 
 if __name__ == '__main__':
   ### MAIN FUNCTIONS ###
-  main()	
+  # main()	
 	# PrettyPlots()
 
 	### TEST FUNCTIONS ###
   # test_beta_marcuse()
   # convergence_test_single()
 	# TestHarness()
-	# test_betaMarcuseAtKd()
+	test_betaMarcuseAtKd()

@@ -953,10 +953,6 @@ class Slab():
 		integrand = self.Ht(dd*Zp,p1,p2)/(p1**2 - p2**2) 	# blows up at p1=p2
 		integrand = smoothMatrix(integrand)				# elminate singular points by using average of nearest neighbors.
 
-		print (1/(2*w*mu*P) * abs(Bc(p))/(B[m]+Bc(p)))[:4]
-		print (2*B[m]*G(m,p) /Zp)[:4]
-		exit()
-
 		self.bb = 1/(2*w*mu*P) * abs(Bc(p))/(B[m]+Bc(p)) * ( \
 			2*B[m]*G(m,p) /Zp \
 			+ np.sum([  (B[m]-B[j])*a[j]*G(j,p) for j in range(N) ], axis=0)/Zp \
@@ -1084,6 +1080,12 @@ class Slab():
 			self.update_bb()
 			self.update_a()
 			self.update_dd()
+
+			if i == 1:
+				print self.bb[:3]
+				print self.a
+				print self.dd[:3]
+				exit()
 
 			# Test for convergence
 			delta = abs(self.a_prev-self.a)

@@ -946,8 +946,13 @@ class Slab():
 		integrand = self.Ht(dd*Zp,p1,p2)/(p1**2 - p2**2) 	# blows up at p1=p2
 		integrand = smoothMatrix(integrand)				# elminate singular points by using average of nearest neighbors.
 
-		print (1/(2*w*mu*P) * abs(Bc(p))/(B[m]+Bc(p)))[:4]
-		print (2*B[m]*G(m,p) /Zp)[:4]
+ 		print self.pres
+ 		print self.pmax
+ 		print self.pmin
+ 		print self.k
+ 		print self.kd
+ 		print self.wl
+ 		print self.d
 		exit()
 
 		self.bb = 1/(2*w*mu*P) * abs(Bc(p))/(B[m]+Bc(p)) * ( \

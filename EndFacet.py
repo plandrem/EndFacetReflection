@@ -709,10 +709,12 @@ def main():
 		ams.append(slab.a)
 		accuracy.append(np.abs(slab.equation14errorTest()))
 
-		if (slab.converged):			
-			print slab.a
-			print slab.bb[:3]
-			print slab.dd[:3]
+		if (slab.converged):
+			print "converged"			
+			# print slab.bb[:3]
+			# print slab.a
+			# print slab.dd[:3]
+			print np.abs(slab.equation14errorTest())
 			exit()
 
 		data = stackPoints(ams)
@@ -1005,6 +1007,17 @@ class Slab():
 		p = self.p
 		m = self.m
 
+		print w
+		print P
+		print bb[:3]
+		print Zp[:3]
+		print B
+		print Bc(p)[:3]
+		print G(self.m,p)[:3]
+		print p[:3]
+		print m
+		print mu
+
 		if not self.converged: return np.nan
 
 		return 1/(4*w*mu*P) * np.trapz(bb*Zp*(B[m]+Bc(p))*G(m,p), x=p)
@@ -1081,17 +1094,11 @@ class Slab():
 			self.update_a()
 			self.update_dd()
 
-			if i == 1:
-				print self.bb[:3]
-				print self.a
-				print self.dd[:3]
-				exit()
-
 			# Test for convergence
 			delta = abs(self.a_prev-self.a)
 			print 'Delta a:', delta
 			if not np.any(delta > 1e-5):
-			 converged = True			
+			 converged = True
 			 break
 
 			# if difference in a has been rising for 2 iterations, value is diverging. Bail.

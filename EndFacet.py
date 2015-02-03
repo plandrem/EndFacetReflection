@@ -709,9 +709,11 @@ def main():
 		ams.append(slab.a)
 		accuracy.append(np.abs(slab.equation14errorTest()))
 
-		# if (slab.converged):			
-		# 	print slab.p[:3]
-		# 	exit()
+		if (slab.converged):			
+			print slab.a
+			print slab.bb[:3]
+			print slab.dd[:3]
+			exit()
 
 		data = stackPoints(ams)
 		data = np.array(data)
@@ -753,12 +755,28 @@ class Slab():
 
 		self.converged = False
 
+	def setMesh(self,pmin=1e-9,pmax=15,pres=400):
+		'''
+		pmax is given as a multiple of k.
+		'''
+		self.pmin = pmin
+		self.pmax = pmax
+		self.pres = pres
+
+		if self.k:
+			p = self.p = np.linspace(pmin, pmax*self.k, pres)
+			self.p2,self.p1 = np.meshgrid(p,p)
+
 	def setFrequencyFromKD(self,kd):
 		self.kd = kd
 		self.wl = 10
 		self.k = 2*pi/self.wl
 		self.d = kd/self.k
 		self.w = c*self.k
+
+		# update p values
+		p = self.p = np.linspace(self.pmin, self.pmax * self.k, self.pres)
+		self.p2,self.p1 = np.meshgrid(p,p)
 
 		self.reset()
 
@@ -913,17 +931,6 @@ class Slab():
 
 		return qt * (Bc(p2) - Bc(p1)) * k**2 * (eps-1) * Bt(p2).conj() * Br(p1).conj() * (  sin( (o(p1)+p2) *d)/(o(p1)+p2)  +  sin( (o(p1)-p2) *d)/(o(p1)-p2)  )
 
-	def setMesh(self,pmin=1e-9,pmax=15,pres=400):
-		'''
-		pmax is given as a multiple of k.
-		'''
-		self.pmin = pmin
-		self.pmax = pmax
-		self.pres = pres
-
-		p = self.p = np.linspace(pmin,pmax,pres)
-		self.p2,self.p1 = np.meshgrid(p,p)
-
 	def update_bb(self):
 		w = self.w
 		P = self.P
@@ -946,13 +953,8 @@ class Slab():
 		integrand = self.Ht(dd*Zp,p1,p2)/(p1**2 - p2**2) 	# blows up at p1=p2
 		integrand = smoothMatrix(integrand)				# elminate singular points by using average of nearest neighbors.
 
- 		print self.pres
- 		print self.pmax
- 		print self.pmin
- 		print self.k
- 		print self.kd
- 		print self.wl
- 		print self.d
+		print (1/(2*w*mu*P) * abs(Bc(p))/(B[m]+Bc(p)))[:4]
+		print (2*B[m]*G(m,p) /Zp)[:4]
 		exit()
 
 		self.bb = 1/(2*w*mu*P) * abs(Bc(p))/(B[m]+Bc(p)) * ( \

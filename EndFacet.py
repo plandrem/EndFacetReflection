@@ -709,9 +709,9 @@ def main():
 		ams.append(slab.a)
 		accuracy.append(np.abs(slab.equation14errorTest()))
 
-		if (slab.converged):			
-			print slab.p[:3]
-			exit()
+		# if (slab.converged):			
+		# 	print slab.p[:3]
+		# 	exit()
 
 		data = stackPoints(ams)
 		data = np.array(data)
@@ -862,7 +862,6 @@ class Slab():
 		Bc = self.Bc
 
 		alpha = 1 * (p <= self.k) + 1j * (p > self.k)
-
 		return alpha * w * mu / abs(Bc(p))
 
 	'''
@@ -945,7 +944,11 @@ class Slab():
 		N = self.N
 
 		integrand = self.Ht(dd*Zp,p1,p2)/(p1**2 - p2**2) 	# blows up at p1=p2
-		integrand = smoothMatrix(integrand)				# elminate singular points by using average of nearest neighbors.		
+		integrand = smoothMatrix(integrand)				# elminate singular points by using average of nearest neighbors.
+
+		print (1/(2*w*mu*P) * abs(Bc(p))/(B[m]+Bc(p)))[:4]
+		print (2*B[m]*G(m,p) /Zp)[:4]
+		exit()
 
 		self.bb = 1/(2*w*mu*P) * abs(Bc(p))/(B[m]+Bc(p)) * ( \
 			2*B[m]*G(m,p) /Zp \

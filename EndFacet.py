@@ -710,8 +710,7 @@ def main():
 		accuracy.append(np.abs(slab.equation14errorTest()))
 
 		if (slab.converged):			
-			print slab.N
-			print slab.B
+			print slab.p[:3]
 			exit()
 
 		data = stackPoints(ams)
@@ -1075,11 +1074,6 @@ class Slab():
 			self.update_bb()
 			self.update_a()
 			self.update_dd()
-
-			print self.bb[:3]
-			print self.a
-			print self.dd[:3]
-			exit()
 
 			# Test for convergence
 			delta = abs(self.a_prev-self.a)

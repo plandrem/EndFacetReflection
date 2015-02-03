@@ -670,6 +670,7 @@ def main():
 	
 	# kds = np.array([2.7,2.8])
 	# kds = np.array([0.628])
+	kds = np.array([1.])
 	
 	# kds = np.array([0.209,0.418,0.628,0.837,1.04,1.25]) # TE Reference values
 	# kds = np.array([0.314,0.418,0.628,0.837,1.04,1.25]) # TM Reference Values
@@ -678,7 +679,7 @@ def main():
 	# kd = d*pi/n
 
 	# Note: If kd is too small, BrentQ will fail to converge.
-	kds = np.linspace(1e-2,3,50)
+	# kds = np.linspace(1e-2,3,50)
 	# kds = np.linspace(2.8,2.9,100)
 
 	n = sqrt(20)
@@ -709,7 +710,7 @@ def main():
 		accuracy.append(np.abs(slab.equation14errorTest()))
 
 		if (slab.converged):			
-			print slab.a
+			print slab.N
 			print slab.B
 			exit()
 
@@ -1074,6 +1075,11 @@ class Slab():
 			self.update_bb()
 			self.update_a()
 			self.update_dd()
+
+			print self.bb[:3]
+			print self.a
+			print self.dd[:3]
+			exit()
 
 			# Test for convergence
 			delta = abs(self.a_prev-self.a)

@@ -367,16 +367,20 @@ class Slab():
     k = self.k
     eps = self.eps
 
-    return sqrt(2*w*mu*P / (B*d + B/g)) * (self.polarization == 'TE') + \
-           sqrt(2*w*eo*eps*P*g / B/ (g*d + eps*k**2/(eps*g**2+B**2))) * (self.polarization == 'TM')
+    if self.polarization == 'TE':
+      return sqrt(2*w*mu*P / (B*d + B/g))
+    else:
+      return sqrt(2*w*eo*eps*P*g / B/ (g*d + eps*k**2/(eps*g**2+B**2)))
 
   def Bt(self,p):
     Bc = self.Bc
     w = self.w
     P = self.P
 
-    return sqrt(2*w*mu*P / (pi*abs(Bc(p)))) * (self.polarization == 'TE') + \
-           sqrt(2*w*eo*P / (pi*abs(Bc(p)))) * (self.polarization == 'TM')
+    if self.polarization == 'TE':
+      return sqrt(2*w*mu*P / (pi*abs(Bc(p))))
+    else:
+      return sqrt(2*w*eo*P / (pi*abs(Bc(p))))
 
   def Br(self,p):
     Bc = self.Bc
@@ -386,16 +390,20 @@ class Slab():
     P = self.P
     eps = self.eps
 
-    return sqrt(2*p**2*w*mu*P / (pi*abs(Bc(p))*(p**2*cos(o(p)*d)**2 + o(p)**2*sin(o(p)*d)**2))) * (self.polarization == 'TE') + \
-           sqrt(2*w*eo*P / (pi*abs(Bc(p))*(cos(o(p)*d)**2 + o(p)**2/eps**2/p**2*sin(o(p)*d)**2))) * (self.polarization == 'TM')
+    if self.polarization == 'TE':
+      return sqrt(2*p**2*w*mu*P / (pi*abs(Bc(p))*(p**2*cos(o(p)*d)**2 + o(p)**2*sin(o(p)*d)**2)))
+    else:
+      return sqrt(2*w*eo*P / (pi*abs(Bc(p))*(cos(o(p)*d)**2 + o(p)**2/eps**2/p**2*sin(o(p)*d)**2)))
 
   def Dr(self,p):
     o = self.o
     d = self.d
     eps = self.eps
 
-    return 1/2. * exp(-1j*p*d) * (cos(o(p)*d) + 1j*o(p)/p * sin(o(p)*d)) * (self.polarization == 'TE') + \
-           1/2. * exp(-1j*p*d) * (cos(o(p)*d) + 1j*o(p)/p/eps * sin(o(p)*d)) * (self.polarization == 'TM')
+    if self.polarization == 'TE':
+      return 1/2. * exp(-1j*p*d) * (cos(o(p)*d) + 1j*o(p)/p * sin(o(p)*d))
+    else:
+      return 1/2. * exp(-1j*p*d) * (cos(o(p)*d) + 1j*o(p)/p/eps * sin(o(p)*d))
 
   def Z(self,p):
     w = self.w
@@ -493,8 +501,10 @@ class Slab():
     '''
     qr = np.tile(qr,(len(qr),1)).transpose()
 
-    return -qr * (B[m] - Bc(p1)) * k**2 * (eps-1) * Bt(p2) * Br(p1) * (  sin( (o(p1)+p2) *d)/(o(p1)+p2)  +  sin( (o(p1)-p2) *d)/(o(p1)-p2)  ) * (self.polarization == 'TE') + \
-            qr * (B[m]*Nu(m,p2)*Zeta(p1,p2) - Bc(p1)*Kappa(m,p2)*f(p1,p2)) * (self.polarization == 'TM')
+    if self.polarization == 'TE':
+      return -qr * (B[m] - Bc(p1)) * k**2 * (eps-1) * Bt(p2) * Br(p1) * (  sin( (o(p1)+p2) *d)/(o(p1)+p2)  +  sin( (o(p1)-p2) *d)/(o(p1)-p2)  )
+    else:
+      return  qr * (B[m]*Nu(m,p1)*Zeta(p2,p1) - Bc(p2)*Kappa(m,p1)*f(p2,p1)) 
 
   def Hr(self,qt,p1,p2):
     k = self.k
@@ -511,8 +521,10 @@ class Slab():
 
     qt = np.tile(qt,(len(qt),1)).transpose()
 
-    return qt * (Bc(p2) - Bc(p1)) * k**2 * (eps-1) * Bt(p2).conj() * Br(p1).conj() * (  sin( (o(p1)+p2) *d)/(o(p1)+p2)  +  sin( (o(p1)-p2) *d)/(o(p1)-p2)  ) * (self.polarization == 'TE') + \
-           qt * (Bc(p1)*f(p1,p2).conj() - Bc(p2)*Zeta(p1,p2).conj()) * (self.polarization == 'TM')
+    if self.polarization == 'TE':
+      return qt * (Bc(p2) - Bc(p1)) * k**2 * (eps-1) * Bt(p2).conj() * Br(p1).conj() * (  sin( (o(p1)+p2) *d)/(o(p1)+p2)  +  sin( (o(p1)-p2) *d)/(o(p1)-p2)  )
+    else:
+      return qt * (Bc(p1)*f(p1,p2).conj() - Bc(p2)*Zeta(p1,p2).conj()) 
 
   def update_bb(self):
     w = self.w
@@ -535,22 +547,26 @@ class Slab():
     Nu = self.Nu
     Kappa = self.Kappa
 
-    integrand = self.Ht(dd*Zp,p1,p2)/(p1**2 - p2**2)  # blows up at p1=p2
-    integrand = smoothMatrix(integrand)       # elminate singular points by using average of nearest neighbors.
+    if self.polarization == 'TE':
+      integrand = self.Ht(dd*Zp,p1,p2)/(p1**2 - p2**2)  # blows up at p1=p2
+      integrand = smoothMatrix(integrand)       # elminate singular points by using average of nearest neighbors.
 
-    self.bb = 1/(2*w*mu*P) * abs(Bc(p))/(B[m]+Bc(p)) * ( \
+      self.bb = 1/(2*w*mu*P) * abs(Bc(p))/(B[m]+Bc(p)) * ( \
                 2*B[m]*G(m,p) /Zp \
                 + np.sum([  (B[m]-B[j])*a[j]*G(j,p) for j in range(N) ], axis=0)/Zp \
                 + np.trapz(integrand/Zp2, x=p, axis=0) \
                 + dd * (B[m]-Bc(p)) * pi * Bt(p)*Br(p)*2*np.real(Dr(p))
-              ) * (self.polarization == 'TE') + \
-              \
-              1/(1.0*w*eo*P) * abs(Bc(p))/(B[m]*Nu(m,p)+Kappa(m,p)*Bc(p)) * ( \
+                )
+
+    else:
+      integrand = self.Ht(dd*Zp,p2,p1)/(p1**2 - p2**2)  # blows up at p1=p2
+      integrand = smoothMatrix(integrand)       # elminate singular points by using average of nearest neighbors.
+
+      self.bb = 1/(1.0*w*eo*P) * abs(Bc(p))/(B[m]*Nu(m,p)+Kappa(m,p)*Bc(p)) * ( \
                 2.0*B[m]*Nu(m,p)*Kappa(m,p) / Zp \
                 + np.sum([  (B[m]*Nu(m,p)*Kappa(j,p)-B[j]*Nu(j,p)*Kappa(m,p))*a[j] for j in range(N) ], axis = 0)/Zp \
                 + np.trapz(integrand/Zp2, x=p, axis=0) \
-                + dd * (B[m]*Nu(m,p)-Bc(p)*Kappa(m,p)) * pi * Bt(p)*Br(p)*np.real(Dr(p))
-              ) * (self.polarization == 'TM')
+                + dd * (B[m]*Nu(m,p)-Bc(p)*Kappa(m,p)) * pi * Bt(p)*Br(p)*np.real(Dr(p)))
               
 
 
@@ -570,13 +586,14 @@ class Slab():
 
     self.a_prev = self.a
 
-    self.a = np.array(
-      [
-        (1/(4*w*mu*P) * np.trapz(bb*Zp * (B[j]-Bc(p)) * G(j,p).conj(), x=p)) * (self.polarization == 'TE') + \
-        (1/(2.0*w*eo*P) * np.trapz(bb*Zp * (B[j]*Nu(j,p).conj()-Bc(p)*Kappa(j,p).conj()), x=p)) * (self.polarization == 'TM') \
-        for j in range(N)
-      ]
-    )
+    if self.polarization == 'TE':
+      self.a = np.array(
+        [1/(4*w*mu*P) * np.trapz(bb*Zp * (B[j]-Bc(p)) * G(j,p).conj(), x=p) for j in range(N)]
+        )
+    else:
+      self.a = np.array(
+        [1/(2.0*w*eo*P) * np.trapz(bb*Zp * (B[j]*Nu(j,p).conj()-Bc(p)*Kappa(j,p).conj()), x=p) for j in range(N)]
+        )
 
 
   def update_dd(self):
@@ -590,11 +607,16 @@ class Slab():
     p1 = self.p1
     p2 = self.p2
 
-    integrand = self.Hr(bb*Zp,p2,p1)/(p2**2 - p1**2) # blows up at p1=p2
-    integrand = smoothMatrix(integrand)
+    if self.polarization == 'TE':
+      integrand = self.Hr(bb*Zp,p2,p1)/(p2**2 - p1**2) # blows up at p1=p2
+      integrand = smoothMatrix(integrand)
 
-    self.dd = 1/(4*w*mu*P) * abs(Bc(p))/Bc(p) * np.trapz(integrand/Zp2, x=p, axis=0) * (self.polarization == 'TE') + \
-              1/(2.0*w*eo*P) * abs(Bc(p))/Bc(p) * np.trapz(integrand/Zp2, x=p, axis=0) * (self.polarization == 'TM')
+      self.dd = 1/(4*w*mu*P) * abs(Bc(p))/Bc(p) * np.trapz(integrand/Zp2, x=p, axis=0)
+    else:
+      integrand = self.Hr(bb*Zp,p2,p1)/(p2**2 - p1**2) # blows up at p1=p2
+      integrand = smoothMatrix(integrand)
+
+      self.dd = 1/(2.0*w*eo*P) * abs(Bc(p))/Bc(p) * np.trapz(integrand/Zp2, x=p, axis=0)
 
   def equation14errorTest(self):
     w = self.w
@@ -611,8 +633,10 @@ class Slab():
 
     if not self.converged: return np.nan
 
-    return 1/(4*w*mu*P) * np.trapz(bb*Zp*(B[m]+Bc(p))*G(m,p), x=p) * (self.polarization == 'TE') + \
-           1/(2*w*mu*P) * np.trapz(bb*Zp*(B[m]*Nu(m,p)+Bc(p)*Kappa(m,p)), x=p) * (self.polarization == 'TM')
+    if self.polarization == 'TE':
+      return 1/(4*w*mu*P) * np.trapz(bb*Zp*(B[m]+Bc(p))*G(m,p), x=p)
+    else:
+      return 1/(2*w*mu*P) * np.trapz(bb*Zp*(B[m]*Nu(m,p)+Bc(p)*Kappa(m,p)), x=p)
 
 
   def SolveForCoefficients(self, imax=200, initial_a=None, initial_d=None):

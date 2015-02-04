@@ -204,20 +204,25 @@ def test_saveSlab():
 	n = sqrt(20)
 
 	slab = Slab(n)
-	slab.setMesh()
+	slab.setMesh(pres=200)
 	slab.setIncidentMode(0)
 	slab.polarization 	= 'TE'
 	slab.polarity 			= 'even'
 
-	for kd in np.linspace(1e-2,3,2):
+	for kd in np.linspace(1e-2,3,10):
 		slab.setFrequencyFromKD(kd)
 		slab.SolveForCoefficients()
 
-	slab.plotResults('a_mag',show=True)
+	# slab.plotResults('a_mag',show=True)
 	slab.save("test_slab.slab")
 
 def test_loadSlab():
 	slab = Slab.load("test_slab.slab")
+
+	print "n = ", slab.n
+	print "polarity = ", slab.polarity
+	print "pres = ", slab.pres
+
 	slab.plotResults('a_mag',show=True)
 
 if __name__ == '__main__':

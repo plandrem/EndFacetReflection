@@ -12,7 +12,7 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 import sys
 import os
 import time
-import pickle
+import dill as pickle
 
 from scipy import sin, cos, exp, tan, arctan, arcsin, arccos
 from scipy.integrate import quadrature as quad
@@ -695,16 +695,21 @@ class Slab():
 		return ax
 
 	def save(self,filename="slab_data.slab"):
-		pickle.dump(self.results, open(filename, 'wb'))
+		with open(filename, 'wb') as f:
+			pickle.dump(self,f)
 
-	def load(self,filename="slab_data.slab"):
-		res = self.results = pickle.load(open(filename, 'rb'))
+	@staticmethod
+	def load(filename="slab_data.slab"):
+		with open(filename, 'rb') as f:
+			return pickle.load(f)
 
-		self.n = res['n']
-		self.polarity = res['polarity']
-		self.polarization = res['polarization']
-		self.m = res['incident_mode']
-		self.setMesh(res['pmin'],res['pmax'],res['pres'])
+		# res = self.results = unpickler.load(open(filename, 'rb'))
+
+		# self.n = res['n']
+		# self.polarity = res['polarity']
+		# self.polarization = res['polarization']
+		# self.m = res['incident_mode']
+		# self.setMesh(res['pmin'],res['pmax'],res['pres'])
 
 
 def PrettyPlots():

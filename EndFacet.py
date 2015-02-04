@@ -670,7 +670,6 @@ def main():
 	
 	# kds = np.array([2.7,2.8])
 	# kds = np.array([0.628])
-	kds = np.array([1.])
 	
 	# kds = np.array([0.209,0.418,0.628,0.837,1.04,1.25]) # TE Reference values
 	# kds = np.array([0.314,0.418,0.628,0.837,1.04,1.25]) # TM Reference Values
@@ -679,7 +678,7 @@ def main():
 	# kd = d*pi/n
 
 	# Note: If kd is too small, BrentQ will fail to converge.
-	# kds = np.linspace(1e-2,3,50)
+	kds = np.linspace(1e-2,3,50)
 	# kds = np.linspace(2.8,2.9,100)
 
 	n = sqrt(20)
@@ -708,14 +707,6 @@ def main():
 
 		ams.append(slab.a)
 		accuracy.append(np.abs(slab.equation14errorTest()))
-
-		if (slab.converged):
-			print "converged"			
-			# print slab.bb[:3]
-			# print slab.a
-			# print slab.dd[:3]
-			print np.abs(slab.equation14errorTest())
-			exit()
 
 		data = stackPoints(ams)
 		data = np.array(data)
@@ -997,7 +988,7 @@ class Slab():
 		self.dd = 1/(4*w*mu*P) * abs(Bc(p))/Bc(p) * np.trapz(integrand/Zp2, x=p, axis=0)
 
 	def equation14errorTest(self):
-		w = self.wl
+		w = self.w
 		P = self.P
 		bb = self.bb
 		Zp = self.Zp
@@ -1006,17 +997,6 @@ class Slab():
 		G = self.G
 		p = self.p
 		m = self.m
-
-		print w
-		print P
-		print bb[:3]
-		print Zp[:3]
-		print B
-		print Bc(p)[:3]
-		print G(self.m,p)[:3]
-		print p[:3]
-		print m
-		print mu
 
 		if not self.converged: return np.nan
 

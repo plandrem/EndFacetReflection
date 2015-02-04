@@ -226,6 +226,14 @@ def test_loadSlab():
 	slab.plotResults('a_mag',show=True)
 
 if __name__ == '__main__':
+
+	'''
+	Reference values for kd:
+	# kds = np.array([0.209,0.418,0.628,0.837,1.04,1.25]) # TE Reference values
+	# kds = np.array([0.314,0.418,0.628,0.837,1.04,1.25]) # TM Reference Values
+
+
+	'''
   # test_betaMarcuseAtKd()
   # test_slabSaveResults()
   # test_slabPlotResults()

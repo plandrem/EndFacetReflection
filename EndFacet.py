@@ -609,6 +609,30 @@ class Slab():
 
 		self.results = res
 
+	def plotResults(self, coefs, ax=None, show=False):
+		'''
+		use coefs = ['a','b','d','eq14'] to create plots of a, b(p), d(p) etc.
+		'''
+
+		# if no axes given, create a new figure for plotting
+		if not ax:
+			print "creating new figure"
+			fig, ax = plt.subplots(1,figsize=(7,5))
+
+		if coefs == 'a':
+			kds = self.results['kds']
+
+			data = stackPoints(self.results['as'])
+			data = np.array(data)
+
+			[ax.plot(kds, abs(data[i]), color=colors[i], marker='o') for i,am in enumerate(data)]
+
+		if show:
+			plt.show()
+
+		return ax
+
+
 def PrettyPlots():
 
 	n = sqrt(20)

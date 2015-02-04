@@ -181,7 +181,24 @@ def test_slabSaveResults():
 	print kds
 	print a
 
+def test_slabPlotResults():
+
+	n = sqrt(20)
+
+	slab = Slab(n)
+	slab.setMesh()
+	slab.setIncidentMode(0)
+	slab.polarization 	= 'TE'
+	slab.polarity 			= 'even'
+
+	for kd in np.linspace(1e-2,3,10):
+		slab.setFrequencyFromKD(kd)
+		slab.SolveForCoefficients()
+
+	slab.plotResults('a',show=True)
+
 if __name__ == '__main__':
   # test_betaMarcuseAtKd()
-  test_slabSaveResults()
+  # test_slabSaveResults()
+  test_slabPlotResults()
 

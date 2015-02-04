@@ -12,6 +12,7 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 import sys
 import os
 import time
+import pickle
 
 from scipy import sin, cos, exp, tan, arctan, arcsin, arccos
 from scipy.integrate import quadrature as quad
@@ -243,6 +244,15 @@ class Slab():
 
 		# Data Storage and Retrieval
 		self.results = {
+			'n' : n,
+			'polarity': self.polarity,
+			'polarization': self.polarization,
+			'incident_mode': self.m,
+
+			'pmax': None,
+			'pmin': None,
+			'pres': None,
+
 			'kds': [],
 			'ps' : [],
 			'as' : [],
@@ -259,6 +269,10 @@ class Slab():
 		self.pmin = pmin
 		self.pmax = pmax
 		self.pres = pres
+
+		self.results['pmin'] = pmin
+		self.results['pmax'] = pmax
+		self.results['pres'] = pres
 
 		if self.k:
 			p = self.p = np.linspace(pmin, pmax*self.k, pres)
@@ -635,7 +649,6 @@ class Slab():
 
 		# if no axes given, create a new figure for plotting
 		if not ax:
-			print "creating new figure"
 			fig, ax = plt.subplots(1,figsize=(7,5))
 
 		kds = self.results['kds']
@@ -680,6 +693,18 @@ class Slab():
 			plt.show()
 
 		return ax
+
+	def save(self,filename="slab_data.slab"):
+		pickle.dump(self.results, open(filename, 'wb'))
+
+	def load(self,filename="slab_data.slab"):
+		res = self.results = pickle.load(open(filename, 'rb'))
+
+		self.n = res['n']
+		self.polarity = res['polarity']
+		self.polarization = res['polarization']
+		self.m = res['incident_mode']
+		self.setMesh(res['pmin'],res['pmax'],res['pres'])
 
 
 def PrettyPlots():
@@ -768,7 +793,6 @@ def main():
 	
 	plt.ion()
 	fig, ax = plt.subplots(3,figsize=(4.5,8))
-	ax[2].axhline(1, color='k', ls = ':')
 	plt.show()
 
 	ams = []
@@ -780,18 +804,9 @@ def main():
 		slab.setFrequencyFromKD(kd)
 		slab.SolveForCoefficients()
 
-		ams.append(slab.a)
-		accuracy.append(np.abs(slab.equation14errorTest()))
-
-		data = stackPoints(ams)
-		data = np.array(data)
-
-		[ax[0].plot(kds[:kdi+1], abs(data[i])        , color=colors[i], marker='o') for i,am in enumerate(data)]
-		[ax[1].plot(kds[:kdi+1], np.angle(data[i])/pi, color=colors[i], marker='o') for i,am in enumerate(data)]
-		ax[0].set_ylim(0,1.2)
-		
-		[ax[2].plot(kds[:kdi+1], accuracy, color='b', marker='o', lw=2) for i,am in enumerate(data)]
-		# ax[2].set_ylim(0.9,1.5)
+		slab.plotResults('a_mag',	  ax=ax[0])
+		slab.plotResults('a_angle', ax=ax[1])
+		slab.plotResults('eq14',    ax=ax[2])
 
 		fig.canvas.draw()
 

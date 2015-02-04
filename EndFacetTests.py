@@ -200,8 +200,30 @@ def test_slabPlotResults():
 	slab.plotResults('a_angle',show=False)
 	slab.plotResults('b',show=True)
 
+def test_saveSlab():
+	n = sqrt(20)
+
+	slab = Slab(n)
+	slab.setMesh()
+	slab.setIncidentMode(0)
+	slab.polarization 	= 'TE'
+	slab.polarity 			= 'even'
+
+	for kd in np.linspace(1e-2,3,2):
+		slab.setFrequencyFromKD(kd)
+		slab.SolveForCoefficients()
+
+	slab.plotResults('a_mag',show=True)
+	slab.save("test_slab.slab")
+
+def test_loadSlab():
+	slab = Slab.load("test_slab.slab")
+	slab.plotResults('a_mag',show=True)
+
 if __name__ == '__main__':
   # test_betaMarcuseAtKd()
   # test_slabSaveResults()
-  test_slabPlotResults()
+  # test_slabPlotResults()
+  test_saveSlab()
+  test_loadSlab()
 

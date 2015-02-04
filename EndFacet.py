@@ -51,6 +51,16 @@ def getExtent(xs,ys):
 	y1 = np.amax(ys)
 	return [x0,x1,y0,y1]
 	
+def getColorSeries(cmap,n):
+
+	'''
+	returns list of n rgba color values for plotting data with matplotlib.
+	'''
+	norm = mpl.colors.Normalize(vmin=0, vmax=n)
+	sm = mpl.cm.ScalarMappable(norm=norm,cmap=cmap)
+
+	return [sm.to_rgba(i) for i in range(n)]
+
 def stackPoints(arrays):
 	# Find largest length
 	N = 0
@@ -238,7 +248,8 @@ class Slab():
 			'as' : [],
 			'ds' : [],
 			'bs' : [],
-			'eq14': []
+			'eq14': [],
+			'Zs':[]
 		}
 
 	def setMesh(self,pmin=1e-9,pmax=15,pres=400):
@@ -607,11 +618,19 @@ class Slab():
 		res['ds'].append(self.dd)
 		res['eq14'].append(self.equation14errorTest())
 
+		# useful for calculating things later
+		res['Zs'].append(self.Z)
+
 		self.results = res
 
-	def plotResults(self, coefs, ax=None, show=False):
+	def plotResults(self, mode, ax=None, show=False):
 		'''
-		use coefs = ['a','b','d','eq14'] to create plots of a, b(p), d(p) etc.
+		mode options:
+		'a_angle': complex angle of a coefficients
+		'a_mag'  : magnitude of a coefficients
+		'b'			 : real + imaginary parts of b coefficients
+		'd'			 : real + imaginary parts of d coefficients
+		'eq14'	 : Gelin equation 14 error test value
 		'''
 
 		# if no axes given, create a new figure for plotting
@@ -619,13 +638,43 @@ class Slab():
 			print "creating new figure"
 			fig, ax = plt.subplots(1,figsize=(7,5))
 
-		if coefs == 'a':
-			kds = self.results['kds']
+		kds = self.results['kds']
 
+		if mode in ['a_angle','a_mag']:			
 			data = stackPoints(self.results['as'])
 			data = np.array(data)
 
-			[ax.plot(kds, abs(data[i]), color=colors[i], marker='o') for i,am in enumerate(data)]
+			if mode == 'a_angle':
+				data = np.angle(data)/pi
+			else:
+				data = np.abs(data)
+
+			colors = getColorSeries('jet',data.shape[0])
+
+			[ax.plot(kds, data[i], color=colors[i], marker='o') for i,am in enumerate(data)]
+
+		elif (mode == 'b' or mode == 'd'):
+			# get generalized coefficient results
+			cs = self.results['bs'] if mode == 'b' else self.results['ds']
+			ps = self.results['ps']
+			Zs = self.results['Zs']
+
+			colors = getColorSeries('jet',len(kds))
+
+			for _i,kd in enumerate(kds):
+				Z0 = Zs[_i](0)
+
+				ax.plot(ps[_i],np.real(cs[_i]*Z0),c=colors[_i],ls='-')
+				ax.plot(ps[_i],np.imag(cs[_i]*Z0),c=colors[_i],ls=':')
+
+		elif mode == 'eq14':			
+			data = np.array(self.results['eq14'])
+			ax.plot(kds, abs(data), color='b', marker='o')
+			ax.axhline(1,c='k',ls=':')
+
+		else:
+			print "ERROR: Unrecognized plotting mode received!"
+
 
 		if show:
 			plt.show()

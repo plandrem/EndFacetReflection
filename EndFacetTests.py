@@ -191,11 +191,14 @@ def test_slabPlotResults():
 	slab.polarization 	= 'TE'
 	slab.polarity 			= 'even'
 
-	for kd in np.linspace(1e-2,3,10):
+	for kd in np.linspace(1e-2,3,2):
 		slab.setFrequencyFromKD(kd)
 		slab.SolveForCoefficients()
 
-	slab.plotResults('a',show=True)
+	slab.plotResults('eq14',show=False)
+	slab.plotResults('a_mag',show=False)
+	slab.plotResults('a_angle',show=False)
+	slab.plotResults('b',show=True)
 
 if __name__ == '__main__':
   # test_betaMarcuseAtKd()

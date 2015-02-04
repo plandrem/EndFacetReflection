@@ -231,6 +231,16 @@ class Slab():
 
 		self.converged = False
 
+		# Data Storage and Retrieval
+		self.results = {
+			'kds': [],
+			'ps' : [],
+			'as' : [],
+			'ds' : [],
+			'bs' : [],
+			'eq14': []
+		}
+
 	def setMesh(self,pmin=1e-9,pmax=15,pres=400):
 		'''
 		pmax is given as a multiple of k.
@@ -489,6 +499,15 @@ class Slab():
 	def SolveForCoefficients(self, imax=200, initial_a=None, initial_d=None):
 
 		'''
+		This method is the heart of Gelin's algorithm, in which we iteratively define
+		the values of the scattering amplitudes. Note that the names bb and dd are used 
+		in place of b(p) and d(p), to avoid naming conflicts between dd and d, the height
+		of the slab.
+
+		Currently, bb and dd are switched from their definitions in Gelin's paper.
+		'''
+
+		'''
 		Must have set frequency at this point. Prepare all remaining slab
 		properties for simulation
 		'''
@@ -573,7 +592,22 @@ class Slab():
 			delta_prev = np.amax(delta)
 
 		self.converged = converged
+
+		if converged: self.storeResults()
+
 		return converged
+
+	def storeResults(self):
+		res = self.results
+
+		res['kds'].append(self.kd)
+		res['ps'].append(self.p)
+		res['as'].append(self.a)
+		res['bs'].append(self.bb)
+		res['ds'].append(self.dd)
+		res['eq14'].append(self.equation14errorTest())
+
+		self.results = res
 
 def PrettyPlots():
 

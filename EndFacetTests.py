@@ -161,7 +161,27 @@ def convergence_test_single():
 	plt.ioff()
 	plt.show()
 
+def test_slabSaveResults():
 
+	n = sqrt(20)
+
+	slab = Slab(n)
+	slab.setMesh()
+	slab.setIncidentMode(0)
+	slab.polarization 	= 'TE'
+	slab.polarity 			= 'even'
+
+	for kd in np.linspace(1e-2,3,2):
+		slab.setFrequencyFromKD(kd)
+		slab.SolveForCoefficients()
+
+	kds = slab.results['kds']
+	a = slab.results['as']
+
+	print kds
+	print a
 
 if __name__ == '__main__':
-  test_betaMarcuseAtKd()
+  # test_betaMarcuseAtKd()
+  test_slabSaveResults()
+

@@ -40,7 +40,7 @@ plt.rcParams['image.origin'] = 'lower'
 plt.rcParams['image.interpolation'] = 'nearest'
 
 PATH = '/Users/Patrick/Documents/PhD/'
-DATA_PATH = PATH + '/DATA/'
+DATA_PATH = PATH + 'Data/'
 
 def cot(x):
   return 1/tan(x)
@@ -724,23 +724,6 @@ class Slab():
       self.update_a()
       self.update_dd()
 
-      # if i==1:
-      #   print self.k
-      #   print self.kd
-      #   print self.wl
-      #   print self.w
-      #   print self.d
-      #   print self.p[-3:]
-      #   print self.Nu(0,p)[:3]
-      #   print self.Kappa(0,p)[:3]
-      #   print self.Ht(self.dd,self.p1,self.p2)[:3,1]
-      #   print self.Hr(self.bb,self.p1,self.p2)[:3,1]
-      #   print self.bb[:3]
-      #   print self.a
-      #   print self.dd[:3]
-      #   exit()
-
-
       # Test for convergence
       delta = abs(self.a_prev-self.a)/abs(self.a)
       print 'Delta a:', delta
@@ -779,6 +762,21 @@ class Slab():
     res['Zs'].append(self.Z)
 
     self.results = res
+
+  def getCoefsForMode(self,mode=0):
+    '''
+    return an array of the reflection coefficients from the set incident mode
+    into a specified mode. Note that the specified mode is within the set
+    for this polarity (eg. mode = 1 when polarity = 'even' will return the 
+    values for a2)
+    '''
+
+    data = stackPoints(self.results['as'])
+    data = np.array(data)
+
+    return data[mode]
+
+
 
   def plotResults(self, mode, ax=None, show=False):
     '''
@@ -845,15 +843,6 @@ class Slab():
   def load(filename="slab_data.slab"):
     with open(filename, 'rb') as f:
       return pickle.load(f)
-
-    # res = self.results = unpickler.load(open(filename, 'rb'))
-
-    # self.n = res['n']
-    # self.polarity = res['polarity']
-    # self.polarization = res['polarization']
-    # self.m = res['incident_mode']
-    # self.setMesh(res['pmin'],res['pmax'],res['pres'])
-
 
 def PrettyPlots():
 
@@ -939,17 +928,12 @@ def main():
   ams = []
   accuracy = []
 
-  last_a = last_d = None
-
   for kdi,kd in enumerate(kds):
 
     print '\nkd:', kd
     slab.setFrequencyFromKD(kd)
 
-    slab.SolveForCoefficients(initial_a=last_a,initial_d=last_d)
-
-    last_a = slab.results['as'][-1]
-    last_d = slab.results['ds'][-1]
+    slab.SolveForCoefficients()
 
     slab.plotResults('a_mag',   ax=ax[0])
     slab.plotResults('a_angle', ax=ax[1])
@@ -960,7 +944,7 @@ def main():
   plt.ioff()
   plt.show()
 
-  sname = DATA_PATH + '/Rectangular Resonator/End Facet Reflection Coefs/endFacet_a' + str(incident_mode*2) + '_' + pol + '_' + polarity + '_' + str(n) + '.slab'
+  sname = DATA_PATH + '/Rectangular Resonator/End Facet Reflection Coefs/endFacet_a' + str(slab.m*2) + '_' + pol + '_' + polarity + '_' + str(n) + '.slab'
   slab.save(sname)
 
 '''

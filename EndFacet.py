@@ -559,13 +559,18 @@ class Slab():
                 )
 
     else:
-      integrand = self.Ht(dd*Zp,p2,p1)/(p1**2 - p2**2)  # blows up at p1=p2
+      '''
+      For TM, convergence works better if we stick with the qr, qt scheme;
+      For convenience, we will simply continue to use the names b and d
+      '''
+
+      integrand = self.Ht(dd,p2,p1)/(p1**2 - p2**2)  # blows up at p1=p2
       integrand = smoothMatrix(integrand)       # elminate singular points by using average of nearest neighbors.
 
       self.bb = 1/(1.0*w*eo*P) * abs(Bc(p))/(B[m]*Nu(m,p)+Kappa(m,p)*Bc(p)) * ( \
-                2.0*B[m]*Nu(m,p)*Kappa(m,p) / Zp \
-                + np.sum([  (B[m]*Nu(m,p)*Kappa(j,p)-B[j]*Nu(j,p)*Kappa(m,p))*a[j] for j in range(N) ], axis = 0)/Zp \
-                + np.trapz(integrand/Zp2, x=p, axis=0) \
+                2.0*B[m]*Nu(m,p)*Kappa(m,p) \
+                + np.sum([  (B[m]*Nu(m,p)*Kappa(j,p)-B[j]*Nu(j,p)*Kappa(m,p))*a[j] for j in range(N) ], axis = 0) \
+                + np.trapz(integrand, x=p, axis=0) \
                 + dd * (B[m]*Nu(m,p)-Bc(p)*Kappa(m,p)) * pi * Bt(p)*Br(p)*np.real(Dr(p)))
               
 
@@ -592,7 +597,7 @@ class Slab():
         )
     else:
       self.a = np.array(
-        [1/(2.0*w*eo*P) * np.trapz(bb*Zp * (B[j]*Nu(j,p).conj()-Bc(p)*Kappa(j,p).conj()), x=p) for j in range(N)]
+        [1/(2.0*w*eo*P) * np.trapz(bb * (B[j]*Nu(j,p).conj()-Bc(p)*Kappa(j,p).conj()), x=p) for j in range(N)]
         )
 
 
@@ -613,10 +618,10 @@ class Slab():
 
       self.dd = 1/(4*w*mu*P) * abs(Bc(p))/Bc(p) * np.trapz(integrand/Zp2, x=p, axis=0)
     else:
-      integrand = self.Hr(bb*Zp,p2,p1)/(p2**2 - p1**2) # blows up at p1=p2
+      integrand = self.Hr(bb,p2,p1)/(p2**2 - p1**2) # blows up at p1=p2
       integrand = smoothMatrix(integrand)
 
-      self.dd = 1/(2.0*w*eo*P) * abs(Bc(p))/Bc(p) * np.trapz(integrand/Zp2, x=p, axis=0)
+      self.dd = 1/(2.0*w*eo*P) * abs(Bc(p))/Bc(p) * np.trapz(integrand, x=p, axis=0)
 
   def equation14errorTest(self):
     w = self.w
@@ -636,7 +641,7 @@ class Slab():
     if self.polarization == 'TE':
       return 1/(4*w*mu*P) * np.trapz(bb*Zp*(B[m]+Bc(p))*G(m,p), x=p)
     else:
-      return 1/(2*w*mu*P) * np.trapz(bb*Zp*(B[m]*Nu(m,p)+Bc(p)*Kappa(m,p)), x=p)
+      return 1/(2*w*mu*P) * np.trapz(bb*(B[m]*Nu(m,p)+Bc(p)*Kappa(m,p)), x=p)
 
 
   def SolveForCoefficients(self, imax=200, initial_a=None, initial_d=None):
@@ -719,17 +724,37 @@ class Slab():
       self.update_a()
       self.update_dd()
 
+      # if i==1:
+      #   print self.k
+      #   print self.kd
+      #   print self.wl
+      #   print self.w
+      #   print self.d
+      #   print self.p[-3:]
+      #   print self.Nu(0,p)[:3]
+      #   print self.Kappa(0,p)[:3]
+      #   print self.Ht(self.dd,self.p1,self.p2)[:3,1]
+      #   print self.Hr(self.bb,self.p1,self.p2)[:3,1]
+      #   print self.bb[:3]
+      #   print self.a
+      #   print self.dd[:3]
+      #   exit()
+
+
       # Test for convergence
-      delta = abs(self.a_prev-self.a)
+      delta = abs(self.a_prev-self.a)/abs(self.a)
       print 'Delta a:', delta
       if not np.any(delta > 1e-5):
        converged = True
+       print 'converged'
+       print self.a
        break
 
       # if difference in a has been rising for 2 iterations, value is diverging. Bail.
 
-      if np.amax(delta) > delta_prev and delta_prev > delta_2prev: break
-
+      # if np.amax(delta) > delta_prev and delta_prev > delta_2prev: break
+      if i > 30 and np.amax(delta) > 1.0: break
+      
       # record difference for this iteration
       delta_2prev = delta_prev
       delta_prev = np.amax(delta)
@@ -895,7 +920,7 @@ def main():
   # kd = d*pi/n
 
   # Note: If kd is too small, BrentQ will fail to converge.
-  kds = np.linspace(1e-2,3,50)
+  kds = np.linspace(1.5,2,50)
 
   n = sqrt(20)
 
@@ -914,11 +939,17 @@ def main():
   ams = []
   accuracy = []
 
+  last_a = last_d = None
+
   for kdi,kd in enumerate(kds):
 
     print '\nkd:', kd
     slab.setFrequencyFromKD(kd)
-    slab.SolveForCoefficients()
+
+    slab.SolveForCoefficients(initial_a=last_a,initial_d=last_d)
+
+    last_a = slab.results['as'][-1]
+    last_d = slab.results['ds'][-1]
 
     slab.plotResults('a_mag',   ax=ax[0])
     slab.plotResults('a_angle', ax=ax[1])

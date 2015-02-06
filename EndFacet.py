@@ -730,9 +730,7 @@ class Slab():
        converged = True
        break
 
-      # if difference in a has been rising for 2 iterations, value is diverging. Bail.
-
-      # if np.amax(delta) > delta_prev and delta_prev > delta_2prev: break
+      # if we're diverging after a number of iterations, bail to save time
       if i > 30 and np.amax(delta) > 1.0: break
       
     self.converged = converged

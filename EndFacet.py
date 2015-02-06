@@ -562,6 +562,8 @@ class Slab():
       '''
       For TM, convergence works better if we stick with the qr, qt scheme;
       For convenience, we will simply continue to use the names b and d
+
+      (this should be re-tested at some point - other changes have been made)
       '''
 
       integrand = self.Ht(dd,p2,p1)/(p1**2 - p2**2)  # blows up at p1=p2

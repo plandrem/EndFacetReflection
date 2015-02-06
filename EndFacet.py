@@ -713,7 +713,6 @@ class Slab():
     '''
 
     converged = False
-    delta_prev = delta_2prev = np.inf
 
     for i in range(imax):
       print '\nComputing iteration %u of %u' % (i+1,imax)
@@ -729,8 +728,6 @@ class Slab():
       print 'Delta a:', delta
       if not np.any(delta > 1e-5):
        converged = True
-       print 'converged'
-       print self.a
        break
 
       # if difference in a has been rising for 2 iterations, value is diverging. Bail.
@@ -738,10 +735,6 @@ class Slab():
       # if np.amax(delta) > delta_prev and delta_prev > delta_2prev: break
       if i > 30 and np.amax(delta) > 1.0: break
       
-      # record difference for this iteration
-      delta_2prev = delta_prev
-      delta_prev = np.amax(delta)
-
     self.converged = converged
 
     if converged: self.storeResults()
